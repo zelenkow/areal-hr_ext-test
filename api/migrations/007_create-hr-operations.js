@@ -1,4 +1,4 @@
-export const up = (pgm) => {
+exports.up = (pgm) => {
   pgm.sql(`
     CREATE TABLE hr_operations (
       id SERIAL PRIMARY KEY,
@@ -22,6 +22,6 @@ export const up = (pgm) => {
   `);
 };
 
-export const down = (pgm) => {
+exports.down = (pgm) => {
   pgm.sql(`DROP TABLE hr_operations;`);
 };
