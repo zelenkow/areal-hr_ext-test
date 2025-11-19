@@ -1,4 +1,5 @@
 import { Injectable} from '@nestjs/common';
+import { Organization } from './interfaces/organization.interface';
 import { DatabaseService } from '../database/database.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -16,7 +17,7 @@ export class OrganizationsService {
     `;
     
     const result = await this.databaseService.query(query);
-    return result.rows;
+    return result.rows as Organization[];
   }
 
   async findOne(id: number) {
@@ -27,7 +28,7 @@ export class OrganizationsService {
     `;
     
     const result = await this.databaseService.query(query, [id]);
-    return result.rows[0];
+    return result.rows[0] as Organization;
   }
 
   async create(createOrganizationDto: CreateOrganizationDto) {
@@ -42,7 +43,7 @@ export class OrganizationsService {
       createOrganizationDto.comment
     ]);
     
-    return result.rows[0];
+    return result.rows[0] as Organization;
   }
 
   async update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
@@ -50,7 +51,7 @@ export class OrganizationsService {
       UPDATE organizations 
       SET name = $1, comment = $2 
       WHERE id = $3
-      RETURNING id, name, comment
+      RETURNING id, name, comment, created_at
     `;
     
     const result = await this.databaseService.query(query, [
@@ -59,7 +60,7 @@ export class OrganizationsService {
       id
     ]);
     
-    return result.rows[0];
+    return result.rows[0] as Organization;
   }
 
   async remove(id: number) {
@@ -67,10 +68,10 @@ export class OrganizationsService {
       UPDATE organizations 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, name
+      RETURNING id, name, comment, created_at
     `;
     
     const result = await this.databaseService.query(query, [id]);
-    return { deletedId: result.rows[0].id };
+    return result.rows[0] as Organization;
   }
 }

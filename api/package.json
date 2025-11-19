@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "migrate:up": "dotenv -e .env -- node-pg-migrate up",
-    "migrate:down": "dotenv -e .env -- node-pg-migrate down", 
+    "migrate:down": "dotenv -e .env -- node-pg-migrate down",
     "migrate:create": "node-pg-migrate create",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^10.0.0",
