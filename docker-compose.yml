@@ -10,12 +10,30 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  api:
+    build: 
+      context: .
+      dockerfile: containers/api/Dockerfile
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/hr_system
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    command: >
+      sh -c "
+        npm run migrate:up &&
+        node dist/main
+      "
+
   nginx:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf    
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
 
 volumes:
   postgres_data:
