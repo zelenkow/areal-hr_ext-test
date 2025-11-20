@@ -11,36 +11,39 @@ import {
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { Organization } from './interfaces/organization.interface';
 
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Get()
-  findAll() {
+  async findAll(): Promise<Organization[]> {
     return this.organizationsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Organization> {
     return this.organizationsService.findOne(id);
   }
 
   @Post()
-  create(@Body() createOrganizationDto: CreateOrganizationDto) {
+  async create(
+    @Body() createOrganizationDto: CreateOrganizationDto,
+  ): Promise<Organization> {
     return this.organizationsService.create(createOrganizationDto);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrganizationDto: UpdateOrganizationDto,
-  ) {
+  ): Promise<Organization> {
     return this.organizationsService.update(id, updateOrganizationDto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<Organization> {
     return this.organizationsService.remove(id);
   }
 }
