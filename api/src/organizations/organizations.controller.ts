@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -24,12 +33,12 @@ export class OrganizationsController {
 
   @Patch(':id')
   update(
-  @Param('id', ParseIntPipe) id: number,
-  @Body() updateOrganizationDto: UpdateOrganizationDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateOrganizationDto: UpdateOrganizationDto,
   ) {
     return this.organizationsService.update(id, updateOrganizationDto);
   }
-  
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.organizationsService.remove(id);

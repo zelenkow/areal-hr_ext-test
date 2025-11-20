@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService {
   private pool: Pool;
 
-  constructor() {
-    const databaseUrl = 'postgres://postgres:password@postgres:5432/hr_system'; // Хардкод для удобства проверки
-    
+  constructor(private configService: ConfigService) {
+    const databaseUrl = this.configService.get<string>('DATABASE_URL');
+
     this.pool = new Pool({
       connectionString: databaseUrl,
     });

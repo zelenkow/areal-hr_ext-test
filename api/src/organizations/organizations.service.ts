@@ -1,4 +1,4 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Organization } from './interfaces/organization.interface';
 import { DatabaseService } from '../database/database.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -15,7 +15,7 @@ export class OrganizationsService {
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
-    
+
     const result = await this.databaseService.query(query);
     return result.rows as Organization[];
   }
@@ -26,7 +26,7 @@ export class OrganizationsService {
       FROM organizations 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    
+
     const result = await this.databaseService.query(query, [id]);
     return result.rows[0] as Organization;
   }
@@ -37,12 +37,12 @@ export class OrganizationsService {
       VALUES ($1, $2) 
       RETURNING id, name, comment, created_at
     `;
-    
+
     const result = await this.databaseService.query(query, [
-      createOrganizationDto.name, 
-      createOrganizationDto.comment
+      createOrganizationDto.name,
+      createOrganizationDto.comment,
     ]);
-    
+
     return result.rows[0] as Organization;
   }
 
@@ -53,13 +53,13 @@ export class OrganizationsService {
       WHERE id = $3
       RETURNING id, name, comment, created_at
     `;
-    
+
     const result = await this.databaseService.query(query, [
       updateOrganizationDto.name,
-      updateOrganizationDto.comment, 
-      id
+      updateOrganizationDto.comment,
+      id,
     ]);
-    
+
     return result.rows[0] as Organization;
   }
 
@@ -70,7 +70,7 @@ export class OrganizationsService {
       WHERE id = $1
       RETURNING id, name, comment, created_at
     `;
-    
+
     const result = await this.databaseService.query(query, [id]);
     return result.rows[0] as Organization;
   }

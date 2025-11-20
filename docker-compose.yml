@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_DB: hr_system
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -14,15 +14,13 @@ services:
     build: 
       context: .
       dockerfile: containers/api/Dockerfile
-    environment:
-      DATABASE_URL: postgres://postgres:password@postgres:5432/hr_system
-    ports:
-      - "3000:3000"
+    env_file:
+      - .env
     depends_on:
       - postgres
     command: >
       sh -c "
-        npm run migrate:up &&
+        npx node-pg-migrate up &&
         node dist/main
       "
 
