@@ -2,16 +2,16 @@
   <div>
     <h2>Организации</h2>
 
-    <button
-      v-if="!showForm"
-      class="btn-create"
-      @click="showForm = true"
+    <AppButton 
+      v-if="!activeMode" 
+      variant="create"
+      @click="startCreate"
     >
       Добавить организацию
-    </button>
+    </AppButton>
 
-    <div
-      v-if="showForm"
+    <div 
+      v-if="activeMode === 'create'" 
       class="create-form"
     >
       <h3>Создать организацию</h3>
@@ -36,19 +36,21 @@
           />
         </div>
 
-        <button
-          type="submit"
-          class="btn-primary"
-        >
-          Создать
-        </button>
-        <button
-          type="button"
-          class="btn-secondary"
-          @click="cancelCreate"
-        >
-          Отмена
-        </button>
+        <div class="form-actions">
+          <AppButton
+            type="submit"
+            variant="primary"
+          >
+            Создать
+          </AppButton>
+          <AppButton
+            type="button"
+            variant="secondary"
+            @click="cancelCreate"
+          >
+            Отмена
+          </AppButton>
+        </div>
       </form>
     </div>
 
@@ -75,18 +77,18 @@
           </p>
 
           <div class="org-actions">
-            <button
-              class="btn-edit"
+            <AppButton
+              variant="edit"
               @click="startEdit(org)"
             >
               Редактировать
-            </button>
-            <button
-              class="btn-delete"
+            </AppButton>
+            <AppButton
+              variant="danger"
               @click="openDeleteModal(org)"
             >
               Удалить
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -117,19 +119,20 @@
             />
           </div>
 
-          <div class="edit-actions">
-            <button
+          <div class="form-actions">
+            <AppButton
               type="submit"
-              class="btn-primary"
+              variant="primary"
             >
               Сохранить
-            </button>
-            <button
-              class="btn-secondary"
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="secondary"
               @click="cancelEdit"
             >
               Отмена
-            </button>
+            </AppButton>
           </div>
         </form>
       </div>
@@ -139,49 +142,36 @@
       <p>Организации отсутствуют</p>
     </div>
 
-    <div
-      v-if="showDeleteModal"
-      class="modal-overlay"
-    >
-      <div class="modal-content">
-        <p>
-          Вы уверены, что хотите удалить организацию? 
-        </p><p class="org-name">
-          "{{ organizationToDelete?.name }}"
-        </p>
-    
-        <div class="modal-actions">
-          <button
-            class="btn-delete"
-            @click="confirmDelete"
-          >
-            Удалить
-          </button>
-          <button
-            class="btn-secondary"
-            @click="closeDeleteModal"
-          >
-            Отмена
-          </button>
-        </div>
-      </div>
-    </div>
+    <DeleteModal
+      :show="showDeleteModal"
+      entity-name="организацию"
+      :entity-title="organizationToDelete?.name || ''"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
+    />
   </div>
 </template>
 
 <script>
 import { organizationsAPI } from '../services/api'
+import AppButton from '../components/AppButton.vue'
+import DeleteModal from '../components/DeleteModal.vue'
 
 export default {
+  name: 'OrganizationsView',
+  components: {
+    AppButton,
+    DeleteModal
+  },
   data() {
     return {
-      showForm: false,
       newOrganization: {name: '', comment: '',},
       organizations: [],
       editingOrganization: null,
       editFormData: { name: '', comment: '' },
       showDeleteModal: false,
       organizationToDelete: null,
+      activeMode: null,
     }
   },
 
@@ -190,7 +180,6 @@ export default {
   },
 
   methods: {
-
     async loadOrganizations() {
       try {
         const response = await organizationsAPI.getAll()
@@ -200,25 +189,32 @@ export default {
       }
     },
 
-    async createOrganization() {
+    startCreate() {
+      this.activeMode = 'create'
+      this.showForm = true
+      this.newOrganization = { name: '', comment: '' }
+    },
 
+    async createOrganization() {
       try {
         const response = await organizationsAPI.create(this.newOrganization)
         this.organizations.push(response.data)
+        this.activeMode = null
         this.showForm = false
         this.newOrganization = { name: '', comment: '' }
       } catch (error) {
-        console.error('Filed to create organization:', error)
+        console.error('Failed to create organization:', error)
       } 
     },
 
     cancelCreate() {
-      console.log('Cancel create')
+      this.activeMode = null
       this.showForm = false
       this.newOrganization = { name: '', comment: '' }
     },
 
     startEdit(organization) {
+      this.activeMode = 'edit'
       this.editingOrganization = organization
       this.editFormData = {
         name: organization.name,
@@ -227,6 +223,7 @@ export default {
     },
 
     cancelEdit() {
+      this.activeMode = null
       this.editingOrganization = null
       this.editFormData = { name: '', comment: '' }
     },
@@ -242,8 +239,9 @@ export default {
         const index = this.organizations.findIndex(org => org.id === updatedOrg.id)
         this.organizations.splice(index, 1, updatedOrg)
     
+        this.activeMode = null
         this.cancelEdit()
-      }     catch (error) {
+      } catch (error) {
         console.error('Failed to update organization:', error)
       }
     },
@@ -270,25 +268,13 @@ export default {
     }   
   }
 }
-
 </script>
 
 <style scoped>
-
-.btn-create {
-  background: #42b983;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
 .edit-form h4,
 .create-form h3 {
   margin-top: -0.5rem;
   margin-bottom: 2.5rem;
-
 }
 
 .edit-form,
@@ -320,29 +306,14 @@ export default {
   padding: 0.5rem;
   font-size: 0.9rem;
   width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-.modal-actions .btn-delete,
-.edit-form .btn-primary,
-.create-form .btn-primary {
-  background: #42b983;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.modal-actions .btn-secondary,
-.edit-form .btn-secondary, 
-.create-form .btn-secondary {
-  margin-left: 0.5rem;
-  border: none;
-  background: #3498db;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 .organizations-list {
@@ -372,58 +343,4 @@ export default {
   justify-content: space-between;
   margin-top: 1rem;
 }
-
-.btn-edit {
-  background: #3498db;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  padding: 0.5rem 0.5rem;
-}
-
-.modal-actions .btn-delete,
-.btn-delete {
-  background: #e74c3c;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  border: none;
-  padding: 0.5rem 0.5rem;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
-.org-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-  margin: 1rem 0;
-  color: #2c3e50;
-}
-
 </style>
