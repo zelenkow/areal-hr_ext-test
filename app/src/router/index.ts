@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import OrganizationsView from '../views/OrganizationsView.vue'
-
-const DepartmentsView = { template: '<div>Departments Page - Coming Soon</div>' }
-const PositionsView = { template: '<div>Positions Page - Coming Soon</div>' }
+import DepartmentsView from '../views/DepartmentsView.vue'
+import PositionsView from '../views/PositionsView.vue'
 
 const routes: RouteRecordRaw[] = [
   { 
