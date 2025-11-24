@@ -265,12 +265,12 @@ export default {
 
     getOrganizationName(orgId) {
       const org = this.organizations.find(o => o.id === orgId)
-      return org.name
+      return org?.name || ''
     },
 
     getParentDepartmentName(parentId) {
       const dept = this.departments.find(d => d.id === parentId)
-      return dept.name
+      return dept?.name || ''
     },
 
     isChildDepartment(department, parentDepartment) {
