@@ -108,7 +108,7 @@ export class DepartmentsService {
       UPDATE departments 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, organization_id, name, parent_id, comment, created_at, updated_at
+      RETURNING id, organization_id, name, parent_id, comment, created_at, updated_at, deleted_at
     `;
 
     try {

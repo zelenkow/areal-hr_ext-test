@@ -1,42 +1,33 @@
 <template>
-  <button
-    :class="buttonClasses"
-    :type="type"
-    @click="$emit('click')"
-  >
+  <button type="button" :class="buttonClasses" @click="$emit('click')">
     <slot />
   </button>
 </template>
 
-<script>
-export default {
-  name: 'AppButton',
-  props: {
-    variant: {
-      type: String,
-      default: 'primary',
-      validator: (value) => ['primary', 'secondary', 'danger', 'create', 'edit'].includes(value)
-    },
-    type: {
-      type: String,
-      default: 'button'
-    }
-  },
-  emits: ['click'],
-  computed: {
-    buttonClasses() {
-      const baseClasses = 'btn'
-      const variantClasses = {
-        primary: 'btn-primary',
-        secondary: 'btn-secondary',
-        danger: 'btn-danger',
-        create: 'btn-create',
-        edit: 'btn-edit'
-      }
-      return `${baseClasses} ${variantClasses[this.variant]}`
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface Props {
+  variant?: 'primary' | 'secondary' | 'danger'
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'primary',
+})
+
+defineEmits<{
+  click: []
+}>()
+
+const buttonClasses = computed(() => {
+  const baseClasses = 'btn'
+  const variantClasses = {
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    danger: 'btn-danger',
+  }
+  return `${baseClasses} ${variantClasses[props.variant]}`
+})
 </script>
 
 <style scoped>
@@ -49,25 +40,21 @@ export default {
   transition: background-color 0.2s;
 }
 
-.btn-primary,
-.btn-create {
+.btn-primary {
   background: #42b983;
   color: white;
 }
 
-.btn-primary:hover,
-.btn-create:hover {
+.btn-primary:hover {
   background: #3aa876;
 }
 
-.btn-secondary,
-.btn-edit {
+.btn-secondary {
   background: #3498db;
   color: white;
 }
 
-.btn-secondary:hover,
-.btn-edit:hover {
+.btn-secondary:hover {
   background: #2980b9;
 }
 

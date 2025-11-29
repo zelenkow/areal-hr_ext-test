@@ -83,7 +83,7 @@ export class PositionsService {
       UPDATE positions 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, name, created_at, updated_at
+      RETURNING id, name, created_at, updated_at, deleted_at
     `;
 
     try {

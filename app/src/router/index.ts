@@ -1,33 +1,23 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import OrganizationsView from '../views/OrganizationsView.vue'
-import DepartmentsView from '../views/DepartmentsView.vue'
-import PositionsView from '../views/PositionsView.vue'
-
-const routes: RouteRecordRaw[] = [
-  { 
-    path: '/', 
-    redirect: '/organizations'
-  },
-  { 
-    path: '/organizations', 
-    component: OrganizationsView,
-    name: 'organizations'
-  },
-  { 
-    path: '/departments', 
-    component: DepartmentsView,
-    name: 'departments' 
-  },
-  { 
-    path: '/positions', 
-    component: PositionsView,
-    name: 'positions'
-  }
-]
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes: [
+    {
+      path: '/organizations',
+      name: 'organizations',
+      component: () => import('@/views/Organizations.vue'),
+    },
+    {
+      path: '/departments',
+      name: 'departments',
+      component: () => import('@/views/Departments.vue'),
+    },
+    {
+      path: '/positions',
+      name: 'positions',
+      component: () => import('@/views/Positions.vue'),
+    },
+  ],
 })
-
 export default router

@@ -87,9 +87,8 @@ export class OrganizationsService {
       UPDATE organizations 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, name, comment, created_at, updated_at
+      RETURNING id, name, comment, created_at, updated_at, deleted_at
     `;
-
     try {
       const result = await this.databaseService.query(query, [id]);
       return result.rows[0] as Organization;

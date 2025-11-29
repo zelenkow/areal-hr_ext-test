@@ -1,51 +1,56 @@
 <template>
   <div id="app">
-    <h1>Кадровый учет</h1>
-    
-    <nav>
-      <router-link to="/organizations">
-        Организации
-      </router-link> |
-      <router-link to="/departments">
-        Отделы
-      </router-link> |
-      <router-link to="/positions">
-        Должности
-      </router-link>
+    <nav class="main-nav">
+      <router-link to="/organizations" class="nav-link"> Организации </router-link>
+      <router-link to="/departments" class="nav-link"> Отделы </router-link>
+      <router-link to="/positions" class="nav-link"> Должности </router-link>
     </nav>
-    
-    <router-view />
+
+    <main class="main-content">
+      <RouterView />
+    </main>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'App'
-}
+<script setup lang="ts">
+import { RouterView } from 'vue-router'
 </script>
 
 <style>
 #app {
   font-family: Arial, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
-nav {
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 2rem;
+.main-nav {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 2rem;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.nav-link {
   text-decoration: none;
-  margin: 0 10px;
+  color: #2c3e50;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-nav a.router-link-exact-active {
-  color: #42b983;
+.nav-link:hover {
+  background: #f8f9fa;
+}
+
+.nav-link.router-link-active {
+  background: #42b983;
+  color: white;
+}
+
+.main-content {
+  padding: 20px;
 }
 </style>
