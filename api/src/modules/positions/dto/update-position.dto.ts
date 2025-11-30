@@ -1,7 +1,3 @@
-import { IsOptional, IsString } from 'class-validator';
-
 export class UpdatePositionDto {
-  @IsString()
-  @IsOptional()
-  name?: string;
+  name: string;
 }

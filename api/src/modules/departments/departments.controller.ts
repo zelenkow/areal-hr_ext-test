@@ -11,33 +11,30 @@ import {
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { Department } from './interfaces/department.interface';
 
 @Controller('departments')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Get()
-  async findAll(): Promise<Department[]> {
+  async findAll() {
     return this.departmentsService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Department> {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.departmentsService.findOne(id);
   }
 
   @Get('organization/:organizationId')
   async findByOrganization(
     @Param('organizationId', ParseIntPipe) organizationId: number,
-  ): Promise<Department[]> {
+  ) {
     return this.departmentsService.findByOrganization(organizationId);
   }
 
   @Post()
-  async create(
-    @Body() createDepartmentDto: CreateDepartmentDto,
-  ): Promise<Department> {
+  async create(@Body() createDepartmentDto: CreateDepartmentDto) {
     return this.departmentsService.create(createDepartmentDto);
   }
 
@@ -45,12 +42,12 @@ export class DepartmentsController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
-  ): Promise<Department> {
+  ) {
     return this.departmentsService.update(id, updateDepartmentDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<Department> {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.departmentsService.remove(id);
   }
 }

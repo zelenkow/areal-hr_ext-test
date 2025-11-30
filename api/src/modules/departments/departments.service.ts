@@ -1,8 +1,14 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Department } from './interfaces/department.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { CreateDepartmentSchema } from './schemas/create-department.schema';
+import { UpdateDepartmentSchema } from './schemas/update-department.schema';
 
 @Injectable()
 export class DepartmentsService {
@@ -15,14 +21,8 @@ export class DepartmentsService {
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
-
-    try {
-      const result = await this.databaseService.query(query);
-
-      return result.rows as Department[];
-    } catch {
-      throw new InternalServerErrorException('Failed to fetch departments');
-    }
+    const result = await this.databaseService.query(query);
+    return result.rows as Department[];
   }
 
   async findOne(id: number): Promise<Department> {
@@ -31,14 +31,8 @@ export class DepartmentsService {
       FROM departments 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-
-    try {
-      const result = await this.databaseService.query(query, [id]);
-
-      return result.rows[0] as Department;
-    } catch {
-      throw new InternalServerErrorException('Failed to fetch department');
-    }
+    const result = await this.databaseService.query(query, [id]);
+    return result.rows[0] as Department;
   }
 
   async findByOrganization(organizationId: number): Promise<Department[]> {
@@ -60,6 +54,10 @@ export class DepartmentsService {
   }
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
+    const { error } = CreateDepartmentSchema.validate(createDepartmentDto);
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
     const query = `
       INSERT INTO departments (organization_id, name, parent_id, comment) 
       VALUES ($1, $2, $3, $4) 
@@ -84,6 +82,10 @@ export class DepartmentsService {
     id: number,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
+    const { error } = UpdateDepartmentSchema.validate(updateDepartmentDto);
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
     const query = `
       UPDATE departments 
       SET name = $1, comment = $2

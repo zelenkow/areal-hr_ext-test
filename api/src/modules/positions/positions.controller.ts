@@ -11,26 +11,23 @@ import {
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
-import { Position } from './interfaces/position.interface';
 
 @Controller('positions')
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}
 
   @Get()
-  async findAll(): Promise<Position[]> {
+  async findAll() {
     return this.positionsService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Position> {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.positionsService.findOne(id);
   }
 
   @Post()
-  async create(
-    @Body() createPositionDto: CreatePositionDto,
-  ): Promise<Position> {
+  async create(@Body() createPositionDto: CreatePositionDto) {
     return this.positionsService.create(createPositionDto);
   }
 
@@ -38,12 +35,12 @@ export class PositionsController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePositionDto: UpdatePositionDto,
-  ): Promise<Position> {
+  ) {
     return this.positionsService.update(id, updatePositionDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<Position> {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.positionsService.remove(id);
   }
 }

@@ -11,26 +11,23 @@ import {
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
-import { Organization } from './interfaces/organization.interface';
 
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Get()
-  async findAll(): Promise<Organization[]> {
+  async findAll() {
     return this.organizationsService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Organization> {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.organizationsService.findOne(id);
   }
 
   @Post()
-  async create(
-    @Body() createOrganizationDto: CreateOrganizationDto,
-  ): Promise<Organization> {
+  async create(@Body() createOrganizationDto: CreateOrganizationDto) {
     return this.organizationsService.create(createOrganizationDto);
   }
 
@@ -38,12 +35,12 @@ export class OrganizationsController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrganizationDto: UpdateOrganizationDto,
-  ): Promise<Organization> {
+  ) {
     return this.organizationsService.update(id, updateOrganizationDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<Organization> {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.organizationsService.remove(id);
   }
 }
