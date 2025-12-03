@@ -1,8 +1,8 @@
 export interface Organization {
   id: number;
   name: string;
-  comment?: string;
+  comment: string;
   created_at: Date;
-  deleted_at?: Date;
+  deleted_at: Date | null;
   updated_at: Date;
 }

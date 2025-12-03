@@ -1,3 +1,3 @@
 export class UpdatePositionDto {
-  name: string;
+  name?: string;
 }

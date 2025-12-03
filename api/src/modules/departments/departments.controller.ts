@@ -26,13 +26,6 @@ export class DepartmentsController {
     return this.departmentsService.findOne(id);
   }
 
-  @Get('organization/:organizationId')
-  async findByOrganization(
-    @Param('organizationId', ParseIntPipe) organizationId: number,
-  ) {
-    return this.departmentsService.findByOrganization(organizationId);
-  }
-
   @Post()
   async create(@Body() createDepartmentDto: CreateDepartmentDto) {
     return this.departmentsService.create(createDepartmentDto);

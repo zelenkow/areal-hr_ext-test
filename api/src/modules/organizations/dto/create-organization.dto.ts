@@ -1,4 +1,4 @@
 export class CreateOrganizationDto {
   name: string;
-  comment?: string;
+  comment: string;
 }

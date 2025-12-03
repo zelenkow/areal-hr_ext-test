@@ -1,4 +1,4 @@
 export class UpdateOrganizationDto {
-  name: string;
+  name?: string;
   comment?: string;
 }

@@ -1,5 +1,4 @@
 export class UpdateDepartmentDto {
-  organization_id: number;
-  name: string;
+  name?: string;
   comment?: string;
 }

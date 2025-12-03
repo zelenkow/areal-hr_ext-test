@@ -16,7 +16,7 @@ export class PositionsService {
 
   async findAll(): Promise<Position[]> {
     const query = `
-      SELECT id, name, created_at, updated_at
+      SELECT id, name, created_at, deleted_at, updated_at
       FROM positions 
       WHERE deleted_at IS NULL
       ORDER BY name ASC
@@ -27,7 +27,7 @@ export class PositionsService {
 
   async findOne(id: number): Promise<Position> {
     const query = `
-      SELECT id, name, created_at, updated_at
+      SELECT id, name, created_at, deleted_at, updated_at
       FROM positions 
       WHERE id = $1 AND deleted_at IS NULL
     `;
@@ -36,20 +36,19 @@ export class PositionsService {
   }
 
   async create(createPositionDto: CreatePositionDto): Promise<Position> {
-    const { error } = CreatePositionSchema.validate(createPositionDto);
+    const { error, value } = CreatePositionSchema.validate(createPositionDto);
+
     if (error) {
       throw new BadRequestException(`Validation failed: ${error.message}`);
     }
     const query = `
       INSERT INTO positions (name) 
       VALUES ($1) 
-      RETURNING id, name, created_at, updated_at
+      RETURNING id, name, created_at, deleted_at, updated_at
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
-        createPositionDto.name,
-      ]);
+      const result = await this.databaseService.query(query, [value.name]);
       return result.rows[0] as Position;
     } catch {
       throw new InternalServerErrorException('Failed to create position');
@@ -60,22 +59,24 @@ export class PositionsService {
     id: number,
     updatePositionDto: UpdatePositionDto,
   ): Promise<Position> {
-    const { error } = UpdatePositionSchema.validate(updatePositionDto);
+    const { error, value } = UpdatePositionSchema.validate(updatePositionDto);
+
     if (error) {
       throw new BadRequestException(`Validation failed: ${error.message}`);
     }
-    const query = `
-      UPDATE positions 
-      SET name = $1
-      WHERE id = $2
-      RETURNING id, name, created_at, updated_at
-    `;
+
+    const current = await this.findOne(id);
+
+    const changes = this.findChanges(current, value);
+
+    if (Object.keys(changes).length === 0) {
+      return current;
+    }
+
+    const { query, values } = this.buildUpdateQuery(changes, id);
 
     try {
-      const result = await this.databaseService.query(query, [
-        updatePositionDto.name,
-        id,
-      ]);
+      const result = await this.databaseService.query(query, values);
       return result.rows[0] as Position;
     } catch {
       throw new InternalServerErrorException('Failed to update position');
@@ -96,5 +97,44 @@ export class PositionsService {
     } catch {
       throw new InternalServerErrorException('Failed to delete position');
     }
+  }
+
+  private findChanges(
+    current: Position,
+    value: UpdatePositionDto,
+  ): Partial<UpdatePositionDto> {
+    const changes: Partial<UpdatePositionDto> = {};
+
+    if (value.name !== undefined && value.name !== current.name) {
+      changes.name = value.name;
+    }
+
+    return changes;
+  }
+
+  private buildUpdateQuery(
+    changes: Partial<UpdatePositionDto>,
+    id: number,
+  ): { query: string; values: (string | number)[] } {
+    const fields: string[] = [];
+    const values: (string | number)[] = [];
+    let paramIndex = 1;
+
+    if (changes.name !== undefined) {
+      fields.push(`name = $${paramIndex}`);
+      values.push(changes.name);
+      paramIndex++;
+    }
+
+    fields.push(`updated_at = CURRENT_TIMESTAMP`);
+    values.push(id);
+
+    const query = `
+      UPDATE positions
+      SET ${fields.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING id, name, created_at, deleted_at, updated_at
+    `;
+    return { query, values };
   }
 }
