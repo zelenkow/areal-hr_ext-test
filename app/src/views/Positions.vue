@@ -2,7 +2,7 @@
   <div class="positions-container">
     <div class="header">
       <h1>Должности</h1>
-      <AppButton variant="primary" @click="startCreate"> Добавить должность </AppButton>
+      <AppButton variant="primary" @click="openCreateModal"> Добавить должность </AppButton>
     </div>
 
     <DataTable v-if="positions.length" striped hover>
@@ -15,10 +15,12 @@
       <template #rows>
         <tr v-for="position in positions" :key="position.id">
           <td>{{ position.name }}</td>
-          <td>{{ dateCreate(position.created_at!) }}</td>
+          <td>{{ formatDate(position.created_at!) }}</td>
           <td class="actions">
-            <AppButton variant="secondary" @click="startEdit(position)"> Редактировать </AppButton>
-            <AppButton variant="danger" @click="deletePosition(position.id!, position.name)">
+            <AppButton variant="secondary" @click="openEditModal(position)">
+              Редактировать
+            </AppButton>
+            <AppButton variant="danger" @click="openDeleteModal(position.id!, position.name)">
               Удалить
             </AppButton>
           </td>
@@ -29,11 +31,11 @@
     <div v-else class="no-data">Нет должностей для отображения</div>
 
     <FormModal
-      :show="showCreateForm"
+      :show="showCreateModal"
       title="Создание должности"
       submit-text="Создать"
       @submit="createPosition"
-      @cancel="cancelCreate"
+      @cancel="closeCreateModal"
     >
       <div class="form-group">
         <label>Название должности:</label>
@@ -50,21 +52,21 @@
     </FormModal>
 
     <FormModal
-      :show="showEditForm"
+      :show="showEditModal"
       title="Редактирование должности"
       submit-text="Сохранить"
       @submit="updatePosition"
-      @cancel="cancelEdit"
+      @cancel="closeEditModal"
     >
       <div class="form-group">
         <label>Название должности:</label>
         <input
           type="text"
           v-model="editingPosition.name"
-          :class="{ error: showEditNameError && !editingPosition.name.trim() }"
+          :class="{ error: showEditNameError && !editingPosition.name?.trim() }"
           placeholder="Введите название должности"
         />
-        <span v-if="showEditNameError && !editingPosition.name.trim()" class="error-text">
+        <span v-if="showEditNameError && !editingPosition.name?.trim()" class="error-text">
           Название обязательно
         </span>
       </div>
@@ -73,126 +75,153 @@
     <ConfirmModal
       :show="showDeleteModal"
       :message="deleteMessage"
-      @confirm="handleConfirmDelete"
-      @cancel="handleCancelDelete"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { Position, CreatePositionDto, UpdatePositionDto } from '@/types/position'
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
 import { ref, onMounted } from 'vue'
-import type { Position } from '@/services'
-import { positionApi } from '@/services'
+import { positionApi } from '@/services/position-api'
+
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const showDeleteModal = ref(false)
 
 const showNameError = ref(false)
 const showEditNameError = ref(false)
-const showCreateForm = ref(false)
-const showDeleteModal = ref(false)
-const showEditForm = ref(false)
+
+const positions = ref<Position[]>([])
+
+const newPosition = ref<CreatePositionDto>({
+  name: '',
+})
+
+const editingPositionId = ref<number | null>(null)
+const originalPositionData = ref<UpdatePositionDto>({
+  name: '',
+})
+const editingPosition = ref<UpdatePositionDto>({
+  name: '',
+})
+
 const positionToDelete = ref(0)
 const deleteMessage = ref('')
-const positions = ref<Position[]>([])
-const newPosition = ref<Position>({
-  name: '',
-})
-const editingPosition = ref<Position>({
-  id: 0,
-  name: '',
-})
 
 onMounted(async () => {
-  await loadPositions()
+  await loadData()
 })
 
-const loadPositions = async () => {
+const formatDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString('ru-RU')
+}
+
+const loadData = async (): Promise<void> => {
   positions.value = await positionApi.getPositions()
 }
 
-const startCreate = () => {
-  showCreateForm.value = true
-  showEditForm.value = false
-  resetForm()
+const openCreateModal = (): void => {
+  resetNewForm()
+  showCreateModal.value = true
+  showEditModal.value = false
 }
 
-const startEdit = (position: Position) => {
-  editingPosition.value = { ...position }
-  showEditForm.value = true
-  showCreateForm.value = false
-}
-
-const createPosition = async () => {
+const createPosition = async (): Promise<void> => {
   showNameError.value = true
 
   if (!newPosition.value.name.trim()) {
     return
   }
+
   await positionApi.createPosition(newPosition.value)
-  await loadPositions()
-  showCreateForm.value = false
-  resetForm()
+  await loadData()
+  closeCreateModal()
 }
 
-const updatePosition = async () => {
+const openEditModal = (position: Position): void => {
+  editingPositionId.value = position.id
+  editingPosition.value = {
+    name: position.name,
+  }
+
+  originalPositionData.value = {
+    name: position.name,
+  }
+
+  showEditModal.value = true
+  showCreateModal.value = false
+}
+
+const updatePosition = async (): Promise<void> => {
   showEditNameError.value = true
 
-  if (!editingPosition.value.name.trim()) {
+  if (!editingPosition.value.name?.trim()) {
     return
   }
-  await positionApi.updatePosition(editingPosition.value.id!, editingPosition.value)
-  await loadPositions()
-  showEditForm.value = false
-  resetEditForm()
+
+  const changes: UpdatePositionDto = {}
+
+  if (editingPosition.value.name?.trim() !== originalPositionData.value.name) {
+    changes.name = editingPosition.value.name
+  }
+
+  if (Object.keys(changes).length === 0) {
+    closeEditModal()
+    return
+  }
+
+  await positionApi.updatePosition(editingPositionId.value!, changes)
+  await loadData()
+  closeEditModal()
 }
 
-const deletePosition = (id: number, name: string) => {
+const openDeleteModal = (id: number, name: string): void => {
   positionToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить должность <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const handleConfirmDelete = async () => {
+const confirmDelete = async (): Promise<void> => {
   await positionApi.deletePosition(positionToDelete.value)
-  await loadPositions()
-  showDeleteModal.value = false
-  positionToDelete.value = 0
+  await loadData()
+  closeDeleteModal()
 }
 
-const handleCancelDelete = () => {
-  showDeleteModal.value = false
-  positionToDelete.value = 0
+const closeCreateModal = (): void => {
+  showCreateModal.value = false
+  resetNewForm()
 }
 
-const cancelCreate = () => {
-  showCreateForm.value = false
-  resetForm()
-}
-
-const cancelEdit = () => {
-  showEditForm.value = false
+const closeEditModal = (): void => {
+  showEditModal.value = false
   resetEditForm()
 }
 
-const resetForm = () => {
+const closeDeleteModal = (): void => {
+  showDeleteModal.value = false
+  positionToDelete.value = 0
+  deleteMessage.value = ''
+}
+
+const resetNewForm = (): void => {
   newPosition.value = {
     name: '',
   }
   showNameError.value = false
 }
 
-const resetEditForm = () => {
+const resetEditForm = (): void => {
+  editingPositionId.value = null
   editingPosition.value = {
-    id: 0,
     name: '',
   }
   showEditNameError.value = false
-}
-
-const dateCreate = (date: Date) => {
-  return new Date(date).toLocaleDateString('ru-RU')
 }
 </script>
 

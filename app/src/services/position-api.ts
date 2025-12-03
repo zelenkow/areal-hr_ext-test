@@ -1,10 +1,4 @@
-interface Position {
-  id?: number
-  name: string
-  created_at?: Date
-  deleted_at?: Date
-  updated_at?: Date
-}
+import type { Position, CreatePositionDto, UpdatePositionDto } from '@/types/position'
 
 class PositionApi {
   private baseURL = '/api'
@@ -27,7 +21,7 @@ class PositionApi {
     return await response.json()
   }
 
-  async createPosition(positionData: Position): Promise<Position> {
+  async createPosition(positionData: CreatePositionDto): Promise<Position> {
     const response = await fetch(`${this.baseURL}/positions`, {
       method: 'POST',
       headers: {
@@ -42,7 +36,7 @@ class PositionApi {
     return await response.json()
   }
 
-  async updatePosition(id: number, positionData: Position): Promise<Position> {
+  async updatePosition(id: number, positionData: UpdatePositionDto): Promise<Position> {
     const response = await fetch(`${this.baseURL}/positions/${id}`, {
       method: 'PATCH',
       headers: {
@@ -70,4 +64,3 @@ class PositionApi {
 }
 
 export const positionApi = new PositionApi()
-export type { Position }

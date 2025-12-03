@@ -2,7 +2,7 @@
   <div class="departments-container">
     <div class="header">
       <h1>Отделы</h1>
-      <AppButton variant="primary" @click="startCreate"> Добавить отдел </AppButton>
+      <AppButton variant="primary" @click="openCreateModal"> Добавить отдел </AppButton>
     </div>
 
     <DataTable v-if="departments.length" striped hover>
@@ -21,10 +21,10 @@
           <td>{{ getParentDepartmentName(department.parent_id) }}</td>
           <td>{{ department.comment || '-' }}</td>
           <td class="actions">
-            <AppButton variant="secondary" @click="startEdit(department)">
+            <AppButton variant="secondary" @click="openEditModal(department)">
               Редактировать
             </AppButton>
-            <AppButton variant="danger" @click="deleteDepartment(department.id!, department.name)">
+            <AppButton variant="danger" @click="openDeleteModal(department.id!, department.name)">
               Удалить
             </AppButton>
           </td>
@@ -35,11 +35,11 @@
     <div v-else class="no-data">Нет отделов для отображения</div>
 
     <FormModal
-      :show="showCreateForm"
+      :show="showCreateModal"
       title="Создание отдела"
       submit-text="Создать"
       @submit="createDepartment"
-      @cancel="cancelCreate"
+      @cancel="closeCreateModal"
     >
       <div class="form-group">
         <label>Организация:</label>
@@ -88,21 +88,21 @@
     </FormModal>
 
     <FormModal
-      :show="showEditForm"
+      :show="showEditModal"
       title="Редактирование отдела"
       submit-text="Сохранить"
       @submit="updateDepartment"
-      @cancel="cancelEdit"
+      @cancel="closeEditModal"
     >
       <div class="form-group">
         <label>Название отдела:</label>
         <input
           type="text"
           v-model="editingDepartment.name"
-          :class="{ error: showEditNameError && !editingDepartment.name.trim() }"
+          :class="{ error: showEditNameError && !editingDepartment.name?.trim() }"
           placeholder="Введите название отдела"
         />
-        <span v-if="showEditNameError && !editingDepartment.name.trim()" class="error-text">
+        <span v-if="showEditNameError && !editingDepartment.name?.trim()" class="error-text">
           Название обязательно
         </span>
       </div>
@@ -119,137 +119,170 @@
     <ConfirmModal
       :show="showDeleteModal"
       :message="deleteMessage"
-      @confirm="handleConfirmDelete"
-      @cancel="handleCancelDelete"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
+import { departmentApi } from '@/services/department-api'
+import { organizationApi } from '@/services/organization-api'
+import type { Organization } from '@/types/organization'
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
 import { ref, onMounted, computed } from 'vue'
-import type { Department, Organization } from '@/services'
-import { departmentApi, organizationApi } from '@/services'
+
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const showDeleteModal = ref(false)
 
 const showNameError = ref(false)
 const showEditNameError = ref(false)
 const showOrganizationError = ref(false)
-const showCreateForm = ref(false)
-const showEditForm = ref(false)
-const showDeleteModal = ref(false)
+
 const departments = ref<Department[]>([])
 const organizations = ref<Organization[]>([])
+
+const newDepartment = ref<CreateDepartmentDto>({
+  organization_id: 0,
+  name: '',
+  parent_id: undefined,
+  comment: '',
+})
+
+const editingDepartmentId = ref<number | null>(null)
+const originalDepartmentData = ref<UpdateDepartmentDto>({
+  name: '',
+  comment: '',
+})
+const editingDepartment = ref<UpdateDepartmentDto>({
+  name: '',
+  comment: '',
+})
+
 const departmentToDelete = ref(0)
 const deleteMessage = ref('')
 
-const newDepartment = ref<Department>({
-  organization_id: 0,
-  name: '',
-  parent_id: undefined,
-  comment: '',
-})
-
-const editingDepartment = ref<Department>({
-  id: 0,
-  organization_id: 0,
-  name: '',
-  parent_id: undefined,
-  comment: '',
-})
-
 const parentDepartments = computed(() => {
-  return departments.value.filter((dept) => dept.id !== editingDepartment.value.id)
+  if (!editingDepartmentId.value) return departments.value
+  return departments.value.filter((dept) => dept.id !== editingDepartmentId.value)
 })
 
 onMounted(async () => {
   await loadData()
 })
 
-const loadData = async () => {
-  departments.value = await departmentApi.getDepartments()
-  organizations.value = await organizationApi.getOrganizations()
-}
-
-const getOrganizationName = (orgId: number) => {
+const getOrganizationName = (orgId: number): string => {
   const org = organizations.value.find((o) => o.id === orgId)
   return org?.name || '-'
 }
 
-const getParentDepartmentName = (parentId?: number) => {
+const getParentDepartmentName = (parentId?: number | null): string => {
   if (!parentId) return '-'
   const parent = departments.value.find((d) => d.id === parentId)
   return parent?.name || '-'
 }
 
-const startCreate = () => {
-  showCreateForm.value = true
-  showEditForm.value = false
-  resetForm()
+const loadData = async (): Promise<void> => {
+  departments.value = await departmentApi.getDepartments()
+  organizations.value = await organizationApi.getOrganizations()
 }
 
-const startEdit = (department: Department) => {
-  editingDepartment.value = { ...department }
-  showEditForm.value = true
-  showCreateForm.value = false
+const openCreateModal = (): void => {
+  resetNewForm()
+  showCreateModal.value = true
+  showEditModal.value = false
 }
 
-const createDepartment = async () => {
+const createDepartment = async (): Promise<void> => {
   showNameError.value = true
   showOrganizationError.value = true
 
   if (!newDepartment.value.organization_id || !newDepartment.value.name.trim()) {
     return
   }
+
   await departmentApi.createDepartment(newDepartment.value)
   await loadData()
-  showCreateForm.value = false
-  resetForm()
+  closeCreateModal()
 }
 
-const updateDepartment = async () => {
+const openEditModal = (department: Department): void => {
+  editingDepartmentId.value = department.id
+  editingDepartment.value = {
+    name: department.name,
+    comment: department.comment,
+  }
+
+  originalDepartmentData.value = {
+    name: department.name,
+    comment: department.comment,
+  }
+
+  showEditModal.value = true
+  showCreateModal.value = false
+}
+
+const updateDepartment = async (): Promise<void> => {
   showEditNameError.value = true
 
-  if (!editingDepartment.value.name.trim()) {
+  if (!editingDepartment.value.name?.trim()) {
     return
   }
-  await departmentApi.updateDepartment(editingDepartment.value.id!, editingDepartment.value)
+
+  const changes: UpdateDepartmentDto = {}
+
+  if (editingDepartment.value.name?.trim() !== originalDepartmentData.value.name) {
+    changes.name = editingDepartment.value.name
+  }
+
+  if (editingDepartment.value.comment?.trim() !== originalDepartmentData.value.comment) {
+    changes.comment = editingDepartment.value.comment
+  }
+
+  if (Object.keys(changes).length === 0) {
+    closeEditModal()
+    return
+  }
+
+  await departmentApi.updateDepartment(editingDepartmentId.value!, changes)
   await loadData()
-  showEditForm.value = false
-  resetEditForm()
+  closeEditModal()
 }
 
-const deleteDepartment = (id: number, name: string) => {
+const openDeleteModal = (id: number, name: string): void => {
   departmentToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить отдел <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const handleConfirmDelete = async () => {
+const confirmDelete = async (): Promise<void> => {
   await departmentApi.deleteDepartment(departmentToDelete.value)
   await loadData()
-  showDeleteModal.value = false
-  departmentToDelete.value = 0
+  closeDeleteModal()
 }
 
-const handleCancelDelete = () => {
-  showDeleteModal.value = false
-  departmentToDelete.value = 0
+const closeCreateModal = (): void => {
+  showCreateModal.value = false
+  resetNewForm()
 }
 
-const cancelCreate = () => {
-  showCreateForm.value = false
-  resetForm()
-}
-
-const cancelEdit = () => {
-  showEditForm.value = false
+const closeEditModal = (): void => {
+  showEditModal.value = false
   resetEditForm()
 }
 
-const resetForm = () => {
+const closeDeleteModal = (): void => {
+  showDeleteModal.value = false
+  departmentToDelete.value = 0
+  deleteMessage.value = ''
+}
+
+const resetNewForm = (): void => {
   newDepartment.value = {
     organization_id: 0,
     name: '',
@@ -260,12 +293,10 @@ const resetForm = () => {
   showOrganizationError.value = false
 }
 
-const resetEditForm = () => {
+const resetEditForm = (): void => {
+  editingDepartmentId.value = null
   editingDepartment.value = {
-    id: 0,
-    organization_id: 0,
     name: '',
-    parent_id: undefined,
     comment: '',
   }
   showEditNameError.value = false

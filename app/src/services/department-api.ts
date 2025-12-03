@@ -1,13 +1,4 @@
-interface Department {
-  id?: number
-  organization_id: number
-  name: string
-  parent_id?: number
-  comment?: string
-  created_at?: Date
-  deleted_at?: Date
-  updated_at?: Date
-}
+import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
 
 class DepartmentApi {
   private baseURL = '/api'
@@ -30,7 +21,7 @@ class DepartmentApi {
     return await response.json()
   }
 
-  async createDepartment(departmentData: Department): Promise<Department> {
+  async createDepartment(departmentData: CreateDepartmentDto): Promise<Department> {
     const response = await fetch(`${this.baseURL}/departments`, {
       method: 'POST',
       headers: {
@@ -45,7 +36,7 @@ class DepartmentApi {
     return await response.json()
   }
 
-  async updateDepartment(id: number, departmentData: Department): Promise<Department> {
+  async updateDepartment(id: number, departmentData: UpdateDepartmentDto): Promise<Department> {
     const response = await fetch(`${this.baseURL}/departments/${id}`, {
       method: 'PATCH',
       headers: {
@@ -73,4 +64,3 @@ class DepartmentApi {
 }
 
 export const departmentApi = new DepartmentApi()
-export type { Department }

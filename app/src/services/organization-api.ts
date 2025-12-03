@@ -1,11 +1,8 @@
-interface Organization {
-  id?: number
-  name: string
-  comment?: string
-  created_at?: Date
-  deleted_at?: Date
-  updated_at?: Date
-}
+import type {
+  Organization,
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+} from '@/types/organization'
 
 class OrganizationApi {
   private baseURL = '/api'
@@ -28,7 +25,7 @@ class OrganizationApi {
     return await response.json()
   }
 
-  async createOrganization(organizationData: Organization): Promise<Organization> {
+  async createOrganization(organizationData: CreateOrganizationDto): Promise<Organization> {
     const response = await fetch(`${this.baseURL}/organizations`, {
       method: 'POST',
       headers: {
@@ -43,13 +40,13 @@ class OrganizationApi {
     return await response.json()
   }
 
-  async updateOrganization(id: number, organizationData: Organization): Promise<Organization> {
+  async updateOrganization(id: number, updateData: UpdateOrganizationDto): Promise<Organization> {
     const response = await fetch(`${this.baseURL}/organizations/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(organizationData),
+      body: JSON.stringify(updateData),
     })
 
     if (!response.ok) {
@@ -70,4 +67,3 @@ class OrganizationApi {
   }
 }
 export const organizationApi = new OrganizationApi()
-export type { Organization }

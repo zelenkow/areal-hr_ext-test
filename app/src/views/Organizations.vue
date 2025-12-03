@@ -2,7 +2,7 @@
   <div class="organizations-container">
     <div class="header">
       <h1>Организации</h1>
-      <AppButton variant="primary" @click="startCreate"> Добавить организацию </AppButton>
+      <AppButton variant="primary" @click="openCreateModal"> Добавить организацию </AppButton>
     </div>
 
     <DataTable v-if="organizations.length" striped hover>
@@ -17,14 +17,14 @@
         <tr v-for="organization in organizations" :key="organization.id">
           <td>{{ organization.name }}</td>
           <td>{{ organization.comment || '-' }}</td>
-          <td>{{ dateCreate(organization.created_at!) }}</td>
+          <td>{{ formatDate(organization.created_at) }}</td>
           <td class="actions">
-            <AppButton variant="secondary" @click="startEdit(organization)">
+            <AppButton variant="secondary" @click="openEditModal(organization)">
               Редактировать
             </AppButton>
             <AppButton
               variant="danger"
-              @click="deleteOrganization(organization.id!, organization.name)"
+              @click="openDeleteModal(organization.id!, organization.name)"
             >
               Удалить
             </AppButton>
@@ -36,11 +36,11 @@
     <div v-else class="no-data">Нет организаций для отображения</div>
 
     <FormModal
-      :show="showCreateForm"
+      :show="showCreateModal"
       title="Создание организации"
       submit-text="Создать"
       @submit="createOrganization"
-      @cancel="cancelCreate"
+      @cancel="closeCreateModal"
     >
       <div class="form-group">
         <label>Название организации:</label>
@@ -65,21 +65,21 @@
     </FormModal>
 
     <FormModal
-      :show="showEditForm"
+      :show="showEditModal"
       title="Редактирование организации"
       submit-text="Сохранить"
       @submit="updateOrganization"
-      @cancel="cancelEdit"
+      @cancel="closeEditModal"
     >
       <div class="form-group">
         <label>Название организации:</label>
         <input
           type="text"
           v-model="editingOrganization.name"
-          :class="{ error: showEditNameError && !editingOrganization.name.trim() }"
+          :class="{ error: showEditNameError && !editingOrganization.name?.trim() }"
           placeholder="Введите название организации"
         />
-        <span v-if="showEditNameError && !editingOrganization.name.trim()" class="error-text">
+        <span v-if="showEditNameError && !editingOrganization.name?.trim()" class="error-text">
           Название обязательно
         </span>
       </div>
@@ -96,128 +96,168 @@
     <ConfirmModal
       :show="showDeleteModal"
       :message="deleteMessage"
-      @confirm="handleConfirmDelete"
-      @cancel="handleCancelDelete"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import type {
+  Organization,
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+} from '@/types/organization'
+import { organizationApi } from '@/services/organization-api'
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
 import { ref, onMounted } from 'vue'
-import type { Organization } from '@/services'
-import { organizationApi } from '@/services'
+
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const showDeleteModal = ref(false)
 
 const showNameError = ref(false)
 const showEditNameError = ref(false)
-const showCreateForm = ref(false)
-const showDeleteModal = ref(false)
-const showEditForm = ref(false)
+
+const organizations = ref<Organization[]>([])
+
+const newOrganization = ref<CreateOrganizationDto>({
+  name: '',
+  comment: '',
+})
+
+const editingOrganizationId = ref<number | null>(null)
+const originalOrganizationData = ref<UpdateOrganizationDto>({
+  name: '',
+  comment: '',
+})
+const editingOrganization = ref<UpdateOrganizationDto>({
+  name: '',
+  comment: '',
+})
+
 const organizationToDelete = ref(0)
 const deleteMessage = ref('')
-const organizations = ref<Organization[]>([])
-const newOrganization = ref<Organization>({
-  name: '',
-  comment: '',
-})
-const editingOrganization = ref<Organization>({
-  id: 0,
-  name: '',
-  comment: '',
-})
 
 onMounted(async () => {
-  await loadOrganizations()
+  await loadData()
 })
 
-const loadOrganizations = async () => {
+const formatDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString('ru-RU')
+}
+
+const loadData = async (): Promise<void> => {
   organizations.value = await organizationApi.getOrganizations()
 }
 
-const startCreate = () => {
-  showCreateForm.value = true
-  showEditForm.value = false
-  resetForm()
+const openCreateModal = (): void => {
+  resetNewForm()
+  showCreateModal.value = true
+  showEditModal.value = false
 }
 
-const startEdit = (organization: Organization) => {
-  editingOrganization.value = { ...organization }
-  showEditForm.value = true
-  showCreateForm.value = false
-}
-
-const createOrganization = async () => {
+const createOrganization = async (): Promise<void> => {
   showNameError.value = true
 
   if (!newOrganization.value.name.trim()) {
     return
   }
+
   await organizationApi.createOrganization(newOrganization.value)
-  await loadOrganizations()
-  showCreateForm.value = false
-  resetForm()
+  await loadData()
+  closeCreateModal()
 }
 
-const updateOrganization = async () => {
+const openEditModal = (organization: Organization): void => {
+  editingOrganizationId.value = organization.id
+  editingOrganization.value = {
+    name: organization.name,
+    comment: organization.comment,
+  }
+
+  originalOrganizationData.value = {
+    name: organization.name,
+    comment: organization.comment,
+  }
+
+  showEditModal.value = true
+  showCreateModal.value = false
+}
+
+const updateOrganization = async (): Promise<void> => {
   showEditNameError.value = true
 
-  if (!editingOrganization.value.name.trim()) {
+  if (!editingOrganization.value.name?.trim()) {
     return
   }
-  await organizationApi.updateOrganization(editingOrganization.value.id!, editingOrganization.value)
-  await loadOrganizations()
-  showEditForm.value = false
-  resetEditForm()
+
+  const changes: UpdateOrganizationDto = {}
+
+  if (editingOrganization.value.name?.trim() !== originalOrganizationData.value.name) {
+    changes.name = editingOrganization.value.name
+  }
+
+  if (editingOrganization.value.comment?.trim() !== originalOrganizationData.value.comment) {
+    changes.comment = editingOrganization.value.comment
+  }
+
+  if (Object.keys(changes).length === 0) {
+    closeEditModal()
+    return
+  }
+
+  await organizationApi.updateOrganization(editingOrganizationId.value!, changes)
+  await loadData()
+  closeEditModal()
 }
 
-const deleteOrganization = (id: number, name: string) => {
+const openDeleteModal = (id: number, name: string): void => {
   organizationToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить организацию <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const handleConfirmDelete = async () => {
+const confirmDelete = async (): Promise<void> => {
   await organizationApi.deleteOrganization(organizationToDelete.value)
-  await loadOrganizations()
-  showDeleteModal.value = false
-  organizationToDelete.value = 0
+  await loadData()
+  closeDeleteModal()
 }
 
-const handleCancelDelete = () => {
-  showDeleteModal.value = false
-  organizationToDelete.value = 0
+const closeCreateModal = (): void => {
+  showCreateModal.value = false
+  resetNewForm()
 }
 
-const cancelCreate = () => {
-  showCreateForm.value = false
-  resetForm()
-}
-
-const cancelEdit = () => {
-  showEditForm.value = false
+const closeEditModal = (): void => {
+  showEditModal.value = false
   resetEditForm()
 }
 
-const resetForm = () => {
+const closeDeleteModal = (): void => {
+  showDeleteModal.value = false
+  organizationToDelete.value = 0
+  deleteMessage.value = ''
+}
+
+const resetNewForm = (): void => {
   newOrganization.value = {
     name: '',
     comment: '',
   }
+  showNameError.value = false
 }
 
-const resetEditForm = () => {
+const resetEditForm = (): void => {
+  editingOrganizationId.value = null
   editingOrganization.value = {
-    id: 0,
     name: '',
     comment: '',
   }
-}
-
-const dateCreate = (date: Date) => {
-  return new Date(date).toLocaleDateString('ru-RU')
+  showEditNameError.value = false
 }
 </script>
 
