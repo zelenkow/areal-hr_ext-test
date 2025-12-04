@@ -1,66 +1,31 @@
-import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
+import type {
+  Department,
+  CreateDepartmentDto,
+  UpdateDepartmentDto,
+} from '@/types/department'
+import { api } from '@/services/Api'
 
-class DepartmentApi {
-  private baseURL = '/api'
+export const departmentApi = {
+  getDepartments() {
+    return api.get<Department[]>('/departments')
+  },
 
-  async getDepartments(): Promise<Department[]> {
-    const response = await fetch(`${this.baseURL}/departments`)
+  getDepartmentById(id: number) {
+    return api.get<Department>(`/departments/${id}`)
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
+  createDepartment(dto: CreateDepartmentDto) {
+    return api.post<Department, CreateDepartmentDto>('/departments', dto)
+  },
 
-  async getDepartmentById(id: number): Promise<Department> {
-    const response = await fetch(`${this.baseURL}/departments/${id}`)
+  updateDepartment(id: number, dto: UpdateDepartmentDto) {
+    return api.patch<Department, UpdateDepartmentDto>(
+      `/departments/${id}`,
+      dto
+    )
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async createDepartment(departmentData: CreateDepartmentDto): Promise<Department> {
-    const response = await fetch(`${this.baseURL}/departments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(departmentData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async updateDepartment(id: number, departmentData: UpdateDepartmentDto): Promise<Department> {
-    const response = await fetch(`${this.baseURL}/departments/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(departmentData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async deleteDepartment(id: number): Promise<Department> {
-    const response = await fetch(`${this.baseURL}/departments/${id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
+  deleteDepartment(id: number) {
+    return api.delete<Department>(`/departments/${id}`)
   }
 }
-
-export const departmentApi = new DepartmentApi()

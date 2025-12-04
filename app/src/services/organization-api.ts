@@ -3,67 +3,29 @@ import type {
   CreateOrganizationDto,
   UpdateOrganizationDto,
 } from '@/types/organization'
+import { api } from '@/services/Api'
 
-class OrganizationApi {
-  private baseURL = '/api'
+export const organizationApi = {
+  getOrganizations() {
+    return api.get<Organization[]>('/organizations')
+  },
 
-  async getOrganizations(): Promise<Organization[]> {
-    const response = await fetch(`${this.baseURL}/organizations`)
+  getOrganizationById(id: number) {
+    return api.get<Organization>(`/organizations/${id}`)
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
+  createOrganization(dto: CreateOrganizationDto) {
+    return api.post<Organization, CreateOrganizationDto>('/organizations', dto)
+  },
 
-  async getOrganizationById(id: number): Promise<Organization> {
-    const response = await fetch(`${this.baseURL}/organizations/${id}`)
+  updateOrganization(id: number, dto: UpdateOrganizationDto) {
+    return api.patch<Organization, UpdateOrganizationDto>(
+      `/organizations/${id}`,
+      dto
+    )
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async createOrganization(organizationData: CreateOrganizationDto): Promise<Organization> {
-    const response = await fetch(`${this.baseURL}/organizations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(organizationData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async updateOrganization(id: number, updateData: UpdateOrganizationDto): Promise<Organization> {
-    const response = await fetch(`${this.baseURL}/organizations/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async deleteOrganization(id: number): Promise<Organization> {
-    const response = await fetch(`${this.baseURL}/organizations/${id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
+  deleteOrganization(id: number) {
+    return api.delete<Organization>(`/organizations/${id}`)
   }
 }
-export const organizationApi = new OrganizationApi()

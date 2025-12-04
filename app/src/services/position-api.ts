@@ -1,66 +1,31 @@
-import type { Position, CreatePositionDto, UpdatePositionDto } from '@/types/position'
+import type {
+  Position,
+  CreatePositionDto,
+  UpdatePositionDto,
+} from '@/types/position'
+import { api } from '@/services/Api'
 
-class PositionApi {
-  private baseURL = '/api'
+export const positionApi = {
+  getPositions() {
+    return api.get<Position[]>('/positions')
+  },
 
-  async getPositions(): Promise<Position[]> {
-    const response = await fetch(`${this.baseURL}/positions`)
+  getPositionById(id: number) {
+    return api.get<Position>(`/positions/${id}`)
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
+  createPosition(dto: CreatePositionDto) {
+    return api.post<Position, CreatePositionDto>('/positions', dto)
+  },
 
-  async getPositionById(id: number): Promise<Position> {
-    const response = await fetch(`${this.baseURL}/positions/${id}`)
+  updatePosition(id: number, dto: UpdatePositionDto) {
+    return api.patch<Position, UpdatePositionDto>(
+      `/positions/${id}`,
+      dto
+    )
+  },
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async createPosition(positionData: CreatePositionDto): Promise<Position> {
-    const response = await fetch(`${this.baseURL}/positions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(positionData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async updatePosition(id: number, positionData: UpdatePositionDto): Promise<Position> {
-    const response = await fetch(`${this.baseURL}/positions/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(positionData),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  }
-
-  async deletePosition(id: number): Promise<Position> {
-    const response = await fetch(`${this.baseURL}/positions/${id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
+  deletePosition(id: number) {
+    return api.delete<Position>(`/positions/${id}`)
   }
 }
-
-export const positionApi = new PositionApi()
