@@ -7,10 +7,13 @@ import {
   ParseIntPipe,
   Patch,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { CreateDepartmentSchema } from './schemas/create-department.schema';
+import { UpdateDepartmentSchema } from './schemas/update-department.schema';
 
 @Controller('departments')
 export class DepartmentsController {
@@ -28,7 +31,14 @@ export class DepartmentsController {
 
   @Post()
   async create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentsService.create(createDepartmentDto);
+    const { error, value } =
+      CreateDepartmentSchema.validate(createDepartmentDto);
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+
+    return this.departmentsService.create(value);
   }
 
   @Patch(':id')
@@ -36,7 +46,13 @@ export class DepartmentsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
   ) {
-    return this.departmentsService.update(id, updateDepartmentDto);
+    const { error, value } =
+      UpdateDepartmentSchema.validate(updateDepartmentDto);
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+    return this.departmentsService.update(id, value);
   }
 
   @Delete(':id')

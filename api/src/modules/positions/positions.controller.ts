@@ -7,10 +7,13 @@ import {
   ParseIntPipe,
   Patch,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { CreatePositionSchema } from './schemas/create-position.schema';
+import { UpdatePositionSchema } from './schemas/update-position.schema';
 
 @Controller('positions')
 export class PositionsController {
@@ -28,7 +31,12 @@ export class PositionsController {
 
   @Post()
   async create(@Body() createPositionDto: CreatePositionDto) {
-    return this.positionsService.create(createPositionDto);
+    const { error, value } = CreatePositionSchema.validate(createPositionDto);
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+    return this.positionsService.create(value);
   }
 
   @Patch(':id')
@@ -36,7 +44,12 @@ export class PositionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePositionDto: UpdatePositionDto,
   ) {
-    return this.positionsService.update(id, updatePositionDto);
+    const { error, value } = UpdatePositionSchema.validate(updatePositionDto);
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+    return this.positionsService.update(id, value);
   }
 
   @Delete(':id')

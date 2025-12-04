@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Position } from './interfaces/position.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
-import { CreatePositionSchema } from './schemas/create-position.schema';
-import { UpdatePositionSchema } from './schemas/update-position.schema';
 
 @Injectable()
 export class PositionsService {
@@ -35,12 +29,7 @@ export class PositionsService {
     return result.rows[0] as Position;
   }
 
-  async create(createPositionDto: CreatePositionDto): Promise<Position> {
-    const { error, value } = CreatePositionSchema.validate(createPositionDto);
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
+  async create(validateDto: CreatePositionDto): Promise<Position> {
     const query = `
       INSERT INTO positions (name) 
       VALUES ($1) 
@@ -48,26 +37,19 @@ export class PositionsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [value.name]);
+      const result = await this.databaseService.query(query, [
+        validateDto.name,
+      ]);
       return result.rows[0] as Position;
     } catch {
       throw new InternalServerErrorException('Failed to create position');
     }
   }
 
-  async update(
-    id: number,
-    updatePositionDto: UpdatePositionDto,
-  ): Promise<Position> {
-    const { error, value } = UpdatePositionSchema.validate(updatePositionDto);
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
-
+  async update(id: number, validateDto: UpdatePositionDto): Promise<Position> {
     const current = await this.findOne(id);
 
-    const changes = this.findChanges(current, value);
+    const changes = this.findChanges(current, validateDto);
 
     if (Object.keys(changes).length === 0) {
       return current;

@@ -7,10 +7,13 @@ import {
   ParseIntPipe,
   Patch,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { CreateOrganizationSchema } from './schemas/create-organization.schema';
+import { UpdateOrganizationSchema } from './schemas/update-organization.schema';
 
 @Controller('organizations')
 export class OrganizationsController {
@@ -28,7 +31,15 @@ export class OrganizationsController {
 
   @Post()
   async create(@Body() createOrganizationDto: CreateOrganizationDto) {
-    return this.organizationsService.create(createOrganizationDto);
+    const { error, value } = CreateOrganizationSchema.validate(
+      createOrganizationDto,
+    );
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+
+    return this.organizationsService.create(value);
   }
 
   @Patch(':id')
@@ -36,7 +47,14 @@ export class OrganizationsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrganizationDto: UpdateOrganizationDto,
   ) {
-    return this.organizationsService.update(id, updateOrganizationDto);
+    const { error, value } = UpdateOrganizationSchema.validate(
+      updateOrganizationDto,
+    );
+
+    if (error) {
+      throw new BadRequestException(`Validation failed: ${error.message}`);
+    }
+    return this.organizationsService.update(id, value);
   }
 
   @Delete(':id')

@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Department } from './interfaces/department.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { CreateDepartmentSchema } from './schemas/create-department.schema';
-import { UpdateDepartmentSchema } from './schemas/update-department.schema';
 
 @Injectable()
 export class DepartmentsService {
@@ -35,26 +29,7 @@ export class DepartmentsService {
     return result.rows[0] as Department;
   }
 
-  async findByOrganization(organizationId: number): Promise<Department[]> {
-    const query = `
-      SELECT id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at
-      FROM departments 
-      WHERE organization_id = $1 AND deleted_at IS NULL
-      ORDER BY name ASC
-    `;
-
-    const result = await this.databaseService.query(query, [organizationId]);
-    return result.rows as Department[];
-  }
-
-  async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
-    const { error, value } =
-      CreateDepartmentSchema.validate(createDepartmentDto);
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
-
+  async create(validateDto: CreateDepartmentDto): Promise<Department> {
     const query = `
       INSERT INTO departments (organization_id, name, parent_id, comment) 
       VALUES ($1, $2, $3, $4) 
@@ -63,10 +38,10 @@ export class DepartmentsService {
 
     try {
       const result = await this.databaseService.query(query, [
-        value.organization_id,
-        value.name,
-        value.parent_id,
-        value.comment,
+        validateDto.organization_id,
+        validateDto.name,
+        validateDto.parent_id,
+        validateDto.comment,
       ]);
       return result.rows[0] as Department;
     } catch {
@@ -76,18 +51,11 @@ export class DepartmentsService {
 
   async update(
     id: number,
-    updateDepartmentDto: UpdateDepartmentDto,
+    validateDto: UpdateDepartmentDto,
   ): Promise<Department> {
-    const { error, value } =
-      UpdateDepartmentSchema.validate(updateDepartmentDto);
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
-
     const current = await this.findOne(id);
 
-    const changes = this.findChanges(current, value);
+    const changes = this.findChanges(current, validateDto);
 
     if (Object.keys(changes).length === 0) {
       return current;

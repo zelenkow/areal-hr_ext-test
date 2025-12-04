@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Organization } from './interfaces/organization.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
-import { CreateOrganizationSchema } from './schemas/create-organization.schema';
-import { UpdateOrganizationSchema } from './schemas/update-organization.schema';
 
 @Injectable()
 export class OrganizationsService {
@@ -35,17 +29,7 @@ export class OrganizationsService {
     return result.rows[0] as Organization;
   }
 
-  async create(
-    createOrganizationDto: CreateOrganizationDto,
-  ): Promise<Organization> {
-    const { error, value } = CreateOrganizationSchema.validate(
-      createOrganizationDto,
-    );
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
-
+  async create(validatedDto: CreateOrganizationDto): Promise<Organization> {
     const query = `
       INSERT INTO organizations (name, comment) 
       VALUES ($1, $2) 
@@ -54,8 +38,8 @@ export class OrganizationsService {
 
     try {
       const result = await this.databaseService.query(query, [
-        value.name,
-        value.comment,
+        validatedDto.name,
+        validatedDto.comment,
       ]);
       return result.rows[0] as Organization;
     } catch {
@@ -65,19 +49,11 @@ export class OrganizationsService {
 
   async update(
     id: number,
-    updateOrganizationDto: UpdateOrganizationDto,
+    validateDto: UpdateOrganizationDto,
   ): Promise<Organization> {
-    const { error, value } = UpdateOrganizationSchema.validate(
-      updateOrganizationDto,
-    );
-
-    if (error) {
-      throw new BadRequestException(`Validation failed: ${error.message}`);
-    }
-
     const current = await this.findOne(id);
 
-    const changes = this.findChanges(current, value);
+    const changes = this.findChanges(current, validateDto);
 
     if (Object.keys(changes).length === 0) {
       return current;
