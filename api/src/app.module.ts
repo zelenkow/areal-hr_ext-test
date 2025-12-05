@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { PositionsModule } from './modules/positions/positions.module';
+import { EmployeesModule } from './modules/employees/employees.module';
 import { DatabaseModule } from './database/database.module';
 
 const envFilePath = `../.env`;
@@ -17,6 +18,7 @@ const envFilePath = `../.env`;
     OrganizationsModule,
     DepartmentsModule,
     PositionsModule,
+    EmployeesModule,
   ],
 })
 export class AppModule {}

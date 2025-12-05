@@ -10,8 +10,8 @@ export class OrganizationsService {
 
   async findAll(): Promise<Organization[]> {
     const query = `
-      SELECT id, name, comment, created_at, deleted_at, updated_at
-      FROM organizations 
+      SELECT *
+      FROM organizations
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
@@ -21,7 +21,7 @@ export class OrganizationsService {
 
   async findOne(id: number): Promise<Organization> {
     const query = `
-      SELECT id, name, comment, created_at, deleted_at, updated_at
+      SELECT *
       FROM organizations 
       WHERE id = $1 AND deleted_at IS NULL
     `;
@@ -33,7 +33,7 @@ export class OrganizationsService {
     const query = `
       INSERT INTO organizations (name, comment) 
       VALUES ($1, $2) 
-      RETURNING id, name, comment, created_at, deleted_at, updated_at
+      RETURNING *
     `;
 
     try {
@@ -74,7 +74,7 @@ export class OrganizationsService {
       UPDATE organizations 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, name, comment, created_at, deleted_at, updated_at
+      RETURNING *
     `;
     try {
       const result = await this.databaseService.query(query, [id]);
@@ -127,7 +127,7 @@ export class OrganizationsService {
       UPDATE organizations 
       SET ${fields.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, name, comment, created_at, deleted_at, updated_at
+      RETURNING *
     `;
     return { query, values };
   }

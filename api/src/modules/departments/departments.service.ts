@@ -10,7 +10,7 @@ export class DepartmentsService {
 
   async findAll(): Promise<Department[]> {
     const query = `
-      SELECT id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at
+      SELECT *
       FROM departments 
       WHERE deleted_at IS NULL
       ORDER BY name ASC
@@ -21,7 +21,7 @@ export class DepartmentsService {
 
   async findOne(id: number): Promise<Department> {
     const query = `
-      SELECT id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at
+      SELECT *
       FROM departments 
       WHERE id = $1 AND deleted_at IS NULL
     `;
@@ -33,7 +33,7 @@ export class DepartmentsService {
     const query = `
       INSERT INTO departments (organization_id, name, parent_id, comment) 
       VALUES ($1, $2, $3, $4) 
-      RETURNING id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at
+      RETURNING *
     `;
 
     try {
@@ -76,7 +76,7 @@ export class DepartmentsService {
       UPDATE departments 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at 
+      RETURNING *
     `;
 
     try {
@@ -131,7 +131,7 @@ export class DepartmentsService {
       UPDATE departments 
       SET ${fields.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, organization_id, name, parent_id, comment, created_at, deleted_at, updated_at
+      RETURNING *
     `;
 
     return { query, values };

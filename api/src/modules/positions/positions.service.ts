@@ -10,7 +10,7 @@ export class PositionsService {
 
   async findAll(): Promise<Position[]> {
     const query = `
-      SELECT id, name, created_at, deleted_at, updated_at
+      SELECT *
       FROM positions 
       WHERE deleted_at IS NULL
       ORDER BY name ASC
@@ -21,7 +21,7 @@ export class PositionsService {
 
   async findOne(id: number): Promise<Position> {
     const query = `
-      SELECT id, name, created_at, deleted_at, updated_at
+      SELECT *
       FROM positions 
       WHERE id = $1 AND deleted_at IS NULL
     `;
@@ -33,7 +33,7 @@ export class PositionsService {
     const query = `
       INSERT INTO positions (name) 
       VALUES ($1) 
-      RETURNING id, name, created_at, deleted_at, updated_at
+      RETURNING *
     `;
 
     try {
@@ -70,7 +70,7 @@ export class PositionsService {
       UPDATE positions 
       SET deleted_at = CURRENT_TIMESTAMP 
       WHERE id = $1
-      RETURNING id, name, created_at, updated_at, deleted_at
+      RETURNING *
     `;
 
     try {
@@ -115,7 +115,7 @@ export class PositionsService {
       UPDATE positions
       SET ${fields.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, name, created_at, deleted_at, updated_at
+      RETURNING *
     `;
     return { query, values };
   }
