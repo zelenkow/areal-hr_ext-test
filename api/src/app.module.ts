@@ -4,6 +4,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { PositionsModule } from './modules/positions/positions.module';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { FilesModule } from './modules/files/files.module';
 import { DatabaseModule } from './database/database.module';
 
 const envFilePath = `../.env`;
@@ -19,6 +20,7 @@ const envFilePath = `../.env`;
     DepartmentsModule,
     PositionsModule,
     EmployeesModule,
+    FilesModule,
   ],
 })
 export class AppModule {}
