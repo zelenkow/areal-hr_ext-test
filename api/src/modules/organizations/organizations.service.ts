@@ -3,6 +3,7 @@ import { Organization } from './interfaces/organization.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { buildUpdateQuery } from '../../common/query.helper';
 
 @Injectable()
 export class OrganizationsService {
@@ -59,7 +60,7 @@ export class OrganizationsService {
       return current;
     }
 
-    const { query, values } = this.buildUpdateQuery(changes, id);
+    const { query, values } = buildUpdateQuery('organizations', changes, id);
 
     try {
       const result = await this.databaseService.query(query, values);
@@ -98,37 +99,5 @@ export class OrganizationsService {
       changes.comment = value.comment;
     }
     return changes;
-  }
-
-  private buildUpdateQuery(
-    changes: Partial<UpdateOrganizationDto>,
-    id: number,
-  ): { query: string; values: (string | number)[] } {
-    const fields: string[] = [];
-    const values: (string | number)[] = [];
-    let paramIndex = 1;
-
-    if (changes.name !== undefined) {
-      fields.push(`name = $${paramIndex}`);
-      values.push(changes.name);
-      paramIndex++;
-    }
-
-    if (changes.comment !== undefined) {
-      fields.push(`comment = $${paramIndex}`);
-      values.push(changes.comment);
-      paramIndex++;
-    }
-
-    fields.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
-
-    const query = `
-      UPDATE organizations 
-      SET ${fields.join(', ')}
-      WHERE id = $${paramIndex}
-      RETURNING *
-    `;
-    return { query, values };
   }
 }

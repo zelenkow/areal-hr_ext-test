@@ -3,6 +3,7 @@ import { Department } from './interfaces/department.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { buildUpdateQuery } from '../../common/query.helper';
 
 @Injectable()
 export class DepartmentsService {
@@ -61,7 +62,7 @@ export class DepartmentsService {
       return current;
     }
 
-    const { query, values } = this.buildUpdateQuery(changes, id);
+    const { query, values } = buildUpdateQuery('departments', changes, id);
 
     try {
       const result = await this.databaseService.query(query, values);
@@ -102,38 +103,5 @@ export class DepartmentsService {
     }
 
     return changes;
-  }
-
-  private buildUpdateQuery(
-    changes: Partial<UpdateDepartmentDto>,
-    id: number,
-  ): { query: string; values: (string | number)[] } {
-    const fields: string[] = [];
-    const values: (string | number)[] = [];
-    let paramIndex = 1;
-
-    if (changes.name !== undefined) {
-      fields.push(`name = $${paramIndex}`);
-      values.push(changes.name);
-      paramIndex++;
-    }
-
-    if (changes.comment !== undefined) {
-      fields.push(`comment = $${paramIndex}`);
-      values.push(changes.comment);
-      paramIndex++;
-    }
-
-    fields.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
-
-    const query = `
-      UPDATE departments 
-      SET ${fields.join(', ')}
-      WHERE id = $${paramIndex}
-      RETURNING *
-    `;
-
-    return { query, values };
   }
 }

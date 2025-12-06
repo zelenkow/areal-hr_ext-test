@@ -3,6 +3,7 @@ import { Position } from './interfaces/position.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { buildUpdateQuery } from '../../common/query.helper';
 
 @Injectable()
 export class PositionsService {
@@ -55,7 +56,7 @@ export class PositionsService {
       return current;
     }
 
-    const { query, values } = this.buildUpdateQuery(changes, id);
+    const { query, values } = buildUpdateQuery('positions', changes, id);
 
     try {
       const result = await this.databaseService.query(query, values);
@@ -92,31 +93,5 @@ export class PositionsService {
     }
 
     return changes;
-  }
-
-  private buildUpdateQuery(
-    changes: Partial<UpdatePositionDto>,
-    id: number,
-  ): { query: string; values: (string | number)[] } {
-    const fields: string[] = [];
-    const values: (string | number)[] = [];
-    let paramIndex = 1;
-
-    if (changes.name !== undefined) {
-      fields.push(`name = $${paramIndex}`);
-      values.push(changes.name);
-      paramIndex++;
-    }
-
-    fields.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
-
-    const query = `
-      UPDATE positions
-      SET ${fields.join(', ')}
-      WHERE id = $${paramIndex}
-      RETURNING *
-    `;
-    return { query, values };
   }
 }

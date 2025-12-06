@@ -3,6 +3,7 @@ import { Employee } from './interfaces/employee.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { buildUpdateQuery } from '../../common/query.helper';
 
 @Injectable()
 export class EmployeesService {
@@ -84,7 +85,7 @@ export class EmployeesService {
       return current;
     }
 
-    const { query, values } = this.buildUpdateQuery(changes, id);
+    const { query, values } = buildUpdateQuery('employees', changes, id);
 
     try {
       const result = await this.databaseService.query(query, values);
@@ -138,7 +139,7 @@ export class EmployeesService {
 
     if (
       value.birth_date !== undefined &&
-      value.birth_date !== current.birth_date.toISOString().split('T')[0]
+      value.birth_date !== current.birth_date
     ) {
       changes.birth_date = value.birth_date;
     }
@@ -159,8 +160,7 @@ export class EmployeesService {
 
     if (
       value.passport_issue_date !== undefined &&
-      value.passport_issue_date !==
-        current.passport_issue_date.toISOString().split('T')[0]
+      value.passport_issue_date !== current.passport_issue_date
     ) {
       changes.passport_issue_date = value.passport_issue_date;
     }
@@ -222,33 +222,5 @@ export class EmployeesService {
     }
 
     return changes;
-  }
-
-  private buildUpdateQuery(
-    changes: Partial<UpdateEmployeeDto>,
-    id: number,
-  ): { query: string; values: (string | number)[] } {
-    const fields: string[] = [];
-    const values: (string | number)[] = [];
-    let paramIndex = 1;
-
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value !== undefined) {
-        fields.push(`${key} = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
-      }
-    });
-
-    fields.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
-
-    const query = `
-      UPDATE employees 
-      SET ${fields.join(', ')}
-      WHERE id = $${paramIndex}
-      RETURNING *
-    `;
-    return { query, values };
   }
 }
