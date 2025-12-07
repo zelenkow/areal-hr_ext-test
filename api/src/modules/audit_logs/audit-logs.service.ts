@@ -1,0 +1,59 @@
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { AuditLog } from './interfaces/audit-log.interface';
+import { DatabaseService } from '../../database/database.service';
+import { CreateAuditLogDto } from './dto/create-audit-log.dto';
+
+@Injectable()
+export class AuditLogsService {
+  constructor(private readonly databaseService: DatabaseService) {}
+
+  async findAll(): Promise<AuditLog[]> {
+    const query = `
+      SELECT * 
+      FROM audit_log 
+      WHERE deleted_at IS NULL
+      ORDER BY created_at DESC
+    `;
+    const result = await this.databaseService.query(query);
+    return result.rows as AuditLog[];
+  }
+
+  async findOne(id: number): Promise<AuditLog> {
+    const query = `
+      SELECT * 
+      FROM audit_log 
+      WHERE id = $1 AND deleted_at IS NULL
+    `;
+    const result = await this.databaseService.query(query, [id]);
+    return result.rows[0] as AuditLog;
+  }
+
+  async create(validatedDto: CreateAuditLogDto): Promise<AuditLog> {
+    const query = `
+      INSERT INTO audit_log (
+        user_id, 
+        entity_type, 
+        entity_id, 
+        field_name, 
+        old_value, 
+        new_value
+      ) 
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `;
+
+    try {
+      const result = await this.databaseService.query(query, [
+        validatedDto.user_id,
+        validatedDto.entity_type,
+        validatedDto.entity_id,
+        validatedDto.field_name,
+        validatedDto.old_value,
+        validatedDto.new_value,
+      ]);
+      return result.rows[0] as AuditLog;
+    } catch {
+      throw new InternalServerErrorException('Failed to create audit log');
+    }
+  }
+}

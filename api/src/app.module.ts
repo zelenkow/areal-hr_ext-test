@@ -6,6 +6,7 @@ import { PositionsModule } from './modules/positions/positions.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { FilesModule } from './modules/files/files.module';
 import { HrOperationsModule } from './modules/hr_operations/hr-operations.module';
+import { AuditLogsModule } from './modules/audit_logs/audit-logs.module';
 import { DatabaseModule } from './database/database.module';
 
 const envFilePath = `../.env`;
@@ -23,6 +24,7 @@ const envFilePath = `../.env`;
     EmployeesModule,
     FilesModule,
     HrOperationsModule,
+    AuditLogsModule,
   ],
 })
 export class AppModule {}
