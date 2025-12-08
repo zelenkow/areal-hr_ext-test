@@ -211,16 +211,19 @@ const createDepartment = async (): Promise<void> => {
   closeCreateModal()
 }
 
-const openEditModal = (department: Department): void => {
+const openEditModal = async (department: Department) => {
+
+  const ogrData = await departmentApi.getDepartmentById(department.id)
+
   editingDepartmentId.value = department.id
   editingDepartment.value = {
-    name: department.name,
-    comment: department.comment,
+    name: ogrData.name,
+    comment: ogrData.comment,
   }
 
   originalDepartmentData.value = {
-    name: department.name,
-    comment: department.comment,
+    name: ogrData.name,
+    comment: ogrData.comment,
   }
 
   showEditModal.value = true

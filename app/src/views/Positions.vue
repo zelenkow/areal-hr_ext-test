@@ -144,14 +144,17 @@ const createPosition = async (): Promise<void> => {
   closeCreateModal()
 }
 
-const openEditModal = (position: Position): void => {
+const openEditModal = async (position: Position) => {
+
+  const ogrData = await positionApi.getPositionById(position.id)
+
   editingPositionId.value = position.id
   editingPosition.value = {
-    name: position.name,
+    name: ogrData.name,
   }
 
   originalPositionData.value = {
-    name: position.name,
+    name: ogrData.name,
   }
 
   showEditModal.value = true

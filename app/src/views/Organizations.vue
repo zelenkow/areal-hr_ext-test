@@ -172,16 +172,19 @@ const createOrganization = async (): Promise<void> => {
   closeCreateModal()
 }
 
-const openEditModal = (organization: Organization): void => {
+const openEditModal = async (organization: Organization) => {
   editingOrganizationId.value = organization.id
+
+  const ogrData = await organizationApi.getOrganizationById(organization.id)
+
   editingOrganization.value = {
-    name: organization.name,
-    comment: organization.comment,
+    name: ogrData.name,
+    comment: ogrData.comment,
   }
 
   originalOrganizationData.value = {
-    name: organization.name,
-    comment: organization.comment,
+    name: ogrData.name,
+    comment: ogrData.comment,
   }
 
   showEditModal.value = true
