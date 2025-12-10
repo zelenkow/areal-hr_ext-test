@@ -2,9 +2,7 @@
   <div class="employees-container">
     <div class="header">
       <h1>Сотрудники</h1>
-      <AppButton variant="primary" @click="openCreateModal">
-        Добавить сотрудника
-      </AppButton>
+      <AppButton variant="primary" @click="openCreateModal"> Добавить сотрудника </AppButton>
     </div>
 
     <DataTable v-if="employees.length" striped hover>
@@ -90,12 +88,12 @@
 <script setup lang="ts">
 import type { Employee, CreateEmployeeDto } from '@/types/employee'
 import { employeeApi } from '@/services/employee-api'
-import { formatFullName } from '@/utils/formatters'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
 import FormModal from '@/components/FormModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -130,25 +128,27 @@ onMounted(async () => {
   await loadData()
 })
 
-const loadData = async (): Promise<void> => {
+const loadData = async () => {
   employees.value = await employeeApi.getEmployees()
 }
 
-const openCreateModal = (): void => {
+const openCreateModal = () => {
   resetNewForm()
   showCreateModal.value = true
 }
 
-const createEmployee = async (): Promise<void> => {
+const createEmployee = async () => {
   showLastNameError.value = true
   showFirstNameError.value = true
   showMiddleNameError.value = true
   showBirthDateError.value = true
 
-  if (!newEmployee.value.last_name.trim() ||
-      !newEmployee.value.first_name.trim() ||
-      !newEmployee.value.middle_name.trim() ||
-      !newEmployee.value.birth_date) {
+  if (
+    !newEmployee.value.last_name.trim() ||
+    !newEmployee.value.first_name.trim() ||
+    !newEmployee.value.middle_name.trim() ||
+    !newEmployee.value.birth_date
+  ) {
     return
   }
 
@@ -159,16 +159,16 @@ const createEmployee = async (): Promise<void> => {
   router.push(`/employees/${createdEmployee.id}`)
 }
 
-const openDetailView = (id: number): void => {
+const openDetailView = (id: number) => {
   router.push(`/employees/${id}`)
 }
 
-const closeCreateModal = (): void => {
+const closeCreateModal = () => {
   showCreateModal.value = false
   resetNewForm()
 }
 
-const resetNewForm = (): void => {
+const resetNewForm = () => {
   newEmployee.value = {
     last_name: '',
     first_name: '',
@@ -190,6 +190,11 @@ const resetNewForm = (): void => {
   showFirstNameError.value = false
   showBirthDateError.value = false
   showMiddleNameError.value = false
+}
+
+const formatFullName = (employee: Employee): string => {
+  const parts = [employee.last_name, employee.first_name, employee.middle_name]
+  return parts.join(' ')
 }
 </script>
 

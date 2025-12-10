@@ -182,18 +182,18 @@ const getParentDepartmentName = (parentId?: number | null): string => {
   return parent?.name || '-'
 }
 
-const loadData = async (): Promise<void> => {
+const loadData = async () => {
   departments.value = await departmentApi.getDepartments()
   organizations.value = await organizationApi.getOrganizations()
 }
 
-const openCreateModal = (): void => {
+const openCreateModal = () => {
   resetNewForm()
   showCreateModal.value = true
   showEditModal.value = false
 }
 
-const createDepartment = async (): Promise<void> => {
+const createDepartment = async () => {
   showNameError.value = true
   showOrganizationError.value = true
 
@@ -207,7 +207,6 @@ const createDepartment = async (): Promise<void> => {
 }
 
 const openEditModal = async (department: Department) => {
-
   const ogrData = await departmentApi.getDepartmentById(department.id)
 
   editingDepartmentId.value = department.id
@@ -225,7 +224,7 @@ const openEditModal = async (department: Department) => {
   showCreateModal.value = false
 }
 
-const updateDepartment = async (): Promise<void> => {
+const updateDepartment = async () => {
   showEditNameError.value = true
 
   if (!editingDepartment.value.name?.trim()) {
@@ -252,35 +251,35 @@ const updateDepartment = async (): Promise<void> => {
   closeEditModal()
 }
 
-const openDeleteModal = (id: number, name: string): void => {
+const openDeleteModal = (id: number, name: string) => {
   departmentToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить отдел <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const confirmDelete = async (): Promise<void> => {
+const confirmDelete = async () => {
   await departmentApi.deleteDepartment(departmentToDelete.value)
   await loadData()
   closeDeleteModal()
 }
 
-const closeCreateModal = (): void => {
+const closeCreateModal = () => {
   showCreateModal.value = false
   resetNewForm()
 }
 
-const closeEditModal = (): void => {
+const closeEditModal = () => {
   showEditModal.value = false
   resetEditForm()
 }
 
-const closeDeleteModal = (): void => {
+const closeDeleteModal = () => {
   showDeleteModal.value = false
   departmentToDelete.value = 0
   deleteMessage.value = ''
 }
 
-const resetNewForm = (): void => {
+const resetNewForm = () => {
   newDepartment.value = {
     organization_id: 0,
     name: '',
@@ -291,7 +290,7 @@ const resetNewForm = (): void => {
   showOrganizationError.value = false
 }
 
-const resetEditForm = (): void => {
+const resetEditForm = () => {
   editingDepartmentId.value = null
   editingDepartment.value = {
     name: '',

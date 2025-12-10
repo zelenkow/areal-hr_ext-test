@@ -150,7 +150,7 @@ const formatDate = (date: Date): string => {
   return new Date(date).toLocaleDateString('ru-RU')
 }
 
-const loadData = async (): Promise<void> => {
+const loadData = async () => {
   organizations.value = await organizationApi.getOrganizations()
 }
 
@@ -160,7 +160,7 @@ const openCreateModal = (): void => {
   showEditModal.value = false
 }
 
-const createOrganization = async (): Promise<void> => {
+const createOrganization = async () => {
   showNameError.value = true
 
   if (!newOrganization.value.name.trim()) {
@@ -191,7 +191,7 @@ const openEditModal = async (organization: Organization) => {
   showCreateModal.value = false
 }
 
-const updateOrganization = async (): Promise<void> => {
+const updateOrganization = async () => {
   showEditNameError.value = true
 
   if (!editingOrganization.value.name?.trim()) {
@@ -218,35 +218,35 @@ const updateOrganization = async (): Promise<void> => {
   closeEditModal()
 }
 
-const openDeleteModal = (id: number, name: string): void => {
+const openDeleteModal = (id: number, name: string) => {
   organizationToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить организацию <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const confirmDelete = async (): Promise<void> => {
+const confirmDelete = async () => {
   await organizationApi.deleteOrganization(organizationToDelete.value)
   await loadData()
   closeDeleteModal()
 }
 
-const closeCreateModal = (): void => {
+const closeCreateModal = () => {
   showCreateModal.value = false
   resetNewForm()
 }
 
-const closeEditModal = (): void => {
+const closeEditModal = () => {
   showEditModal.value = false
   resetEditForm()
 }
 
-const closeDeleteModal = (): void => {
+const closeDeleteModal = () => {
   showDeleteModal.value = false
   organizationToDelete.value = 0
   deleteMessage.value = ''
 }
 
-const resetNewForm = (): void => {
+const resetNewForm = () => {
   newOrganization.value = {
     name: '',
     comment: '',
@@ -254,7 +254,7 @@ const resetNewForm = (): void => {
   showNameError.value = false
 }
 
-const resetEditForm = (): void => {
+const resetEditForm = () => {
   editingOrganizationId.value = null
   editingOrganization.value = {
     name: '',

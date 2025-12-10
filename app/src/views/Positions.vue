@@ -122,17 +122,17 @@ const formatDate = (date: Date): string => {
   return new Date(date).toLocaleDateString('ru-RU')
 }
 
-const loadData = async (): Promise<void> => {
+const loadData = async () => {
   positions.value = await positionApi.getPositions()
 }
 
-const openCreateModal = (): void => {
+const openCreateModal = () => {
   resetNewForm()
   showCreateModal.value = true
   showEditModal.value = false
 }
 
-const createPosition = async (): Promise<void> => {
+const createPosition = async () => {
   showNameError.value = true
 
   if (!newPosition.value.name.trim()) {
@@ -145,7 +145,6 @@ const createPosition = async (): Promise<void> => {
 }
 
 const openEditModal = async (position: Position) => {
-
   const ogrData = await positionApi.getPositionById(position.id)
 
   editingPositionId.value = position.id
@@ -161,7 +160,7 @@ const openEditModal = async (position: Position) => {
   showCreateModal.value = false
 }
 
-const updatePosition = async (): Promise<void> => {
+const updatePosition = async () => {
   showEditNameError.value = true
 
   if (!editingPosition.value.name?.trim()) {
@@ -184,42 +183,42 @@ const updatePosition = async (): Promise<void> => {
   closeEditModal()
 }
 
-const openDeleteModal = (id: number, name: string): void => {
+const openDeleteModal = (id: number, name: string) => {
   positionToDelete.value = id
   deleteMessage.value = `Вы уверены, что хотите удалить должность <strong>"${name}"</strong>?`
   showDeleteModal.value = true
 }
 
-const confirmDelete = async (): Promise<void> => {
+const confirmDelete = async () => {
   await positionApi.deletePosition(positionToDelete.value)
   await loadData()
   closeDeleteModal()
 }
 
-const closeCreateModal = (): void => {
+const closeCreateModal = () => {
   showCreateModal.value = false
   resetNewForm()
 }
 
-const closeEditModal = (): void => {
+const closeEditModal = () => {
   showEditModal.value = false
   resetEditForm()
 }
 
-const closeDeleteModal = (): void => {
+const closeDeleteModal = () => {
   showDeleteModal.value = false
   positionToDelete.value = 0
   deleteMessage.value = ''
 }
 
-const resetNewForm = (): void => {
+const resetNewForm = () => {
   newPosition.value = {
     name: '',
   }
   showNameError.value = false
 }
 
-const resetEditForm = (): void => {
+const resetEditForm = () => {
   editingPositionId.value = null
   editingPosition.value = {
     name: '',
