@@ -72,8 +72,8 @@
         <label>Родительский отдел:</label>
         <select v-model="newDepartment.parent_id">
           <option :value="undefined">Нет</option>
-          <option v-for="dept in parentDepartments" :key="dept.id" :value="dept.id">
-            {{ dept.name }}
+          <option v-for="department in departments" :key="department.id" :value="department.id">
+            {{ department.name }}
           </option>
         </select>
       </div>
@@ -127,14 +127,14 @@
 
 <script setup lang="ts">
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
+import type { Organization } from '@/types/organization'
 import { departmentApi } from '@/services/department-api'
 import { organizationApi } from '@/services/organization-api'
-import type { Organization } from '@/types/organization'
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
@@ -166,11 +166,6 @@ const editingDepartment = ref<UpdateDepartmentDto>({
 
 const departmentToDelete = ref(0)
 const deleteMessage = ref('')
-
-const parentDepartments = computed(() => {
-  if (!editingDepartmentId.value) return departments.value
-  return departments.value.filter((dept) => dept.id !== editingDepartmentId.value)
-})
 
 onMounted(async () => {
   await loadData()
