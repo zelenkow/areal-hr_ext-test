@@ -1,8 +1,4 @@
-import type {
-  Position,
-  CreatePositionDto,
-  UpdatePositionDto,
-} from '@/types/position'
+import type { Position, CreatePositionDto, UpdatePositionDto } from '@/types/position'
 import { api } from '@/services/Api'
 
 export const positionApi = {
@@ -19,13 +15,10 @@ export const positionApi = {
   },
 
   updatePosition(id: number, dto: UpdatePositionDto) {
-    return api.patch<Position, UpdatePositionDto>(
-      `/positions/${id}`,
-      dto
-    )
+    return api.patch<Position, UpdatePositionDto>(`/positions/${id}`, dto)
   },
 
   deletePosition(id: number) {
     return api.delete<Position>(`/positions/${id}`)
-  }
+  },
 }

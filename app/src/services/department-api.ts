@@ -1,8 +1,4 @@
-import type {
-  Department,
-  CreateDepartmentDto,
-  UpdateDepartmentDto,
-} from '@/types/department'
+import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
 import { api } from '@/services/Api'
 
 export const departmentApi = {
@@ -19,13 +15,10 @@ export const departmentApi = {
   },
 
   updateDepartment(id: number, dto: UpdateDepartmentDto) {
-    return api.patch<Department, UpdateDepartmentDto>(
-      `/departments/${id}`,
-      dto
-    )
+    return api.patch<Department, UpdateDepartmentDto>(`/departments/${id}`, dto)
   },
 
   deleteDepartment(id: number) {
     return api.delete<Department>(`/departments/${id}`)
-  }
+  },
 }

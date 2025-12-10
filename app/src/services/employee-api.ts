@@ -1,8 +1,4 @@
-import type {
-  Employee,
-  CreateEmployeeDto,
-  UpdateEmployeeDto,
-} from '@/types/employee'
+import type { Employee, CreateEmployeeDto, UpdateEmployeeDto } from '@/types/employee'
 import { api } from '@/services/Api'
 
 export const employeeApi = {
@@ -19,13 +15,10 @@ export const employeeApi = {
   },
 
   updateEmployee(id: number, dto: UpdateEmployeeDto) {
-    return api.patch<Employee, UpdateEmployeeDto>(
-      `/employees/${id}`,
-      dto
-    )
+    return api.patch<Employee, UpdateEmployeeDto>(`/employees/${id}`, dto)
   },
 
   deleteEmployee(id: number) {
     return api.delete<Employee>(`/employees/${id}`)
-  }
+  },
 }

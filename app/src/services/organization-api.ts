@@ -19,13 +19,10 @@ export const organizationApi = {
   },
 
   updateOrganization(id: number, dto: UpdateOrganizationDto) {
-    return api.patch<Organization, UpdateOrganizationDto>(
-      `/organizations/${id}`,
-      dto
-    )
+    return api.patch<Organization, UpdateOrganizationDto>(`/organizations/${id}`, dto)
   },
 
   deleteOrganization(id: number) {
     return api.delete<Organization>(`/organizations/${id}`)
-  }
+  },
 }

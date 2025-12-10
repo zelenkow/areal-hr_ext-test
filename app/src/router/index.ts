@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'employees',
       component: () => import('@/views/Employees.vue'),
     },
+    {
+      path: '/employees/:id',
+      name: 'employee-detail',
+      component: () => import('@/views/EmployeeDetailView.vue'),
+    },
   ],
 })
 export default router
