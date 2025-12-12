@@ -15,9 +15,19 @@ export interface Employee {
   registration_house: string
   registration_building: string
   registration_apartment: string
+  hr_status: EmployeeStatus
+  current_department_id: number | null
+  current_position_id: number | null
+  current_salary: number | null
   created_at: Date
   deleted_at: Date | null
   updated_at: Date
+}
+
+export enum EmployeeStatus {
+  NOT_HIRED = 'NOT_HIRED',
+  ACTIVE = 'ACTIVE',
+  DISMISSED = 'DISMISSED',
 }
 
 export interface CreateEmployeeDto {
@@ -54,4 +64,11 @@ export interface UpdateEmployeeDto {
   registration_house?: string
   registration_building?: string
   registration_apartment?: string
+}
+
+export interface EmployeeState {
+  hr_status: string
+  current_department_id: number | null
+  current_position_id: number | null
+  current_salary: number | null
 }

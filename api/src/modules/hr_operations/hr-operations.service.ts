@@ -1,55 +1,51 @@
 import {
   Injectable,
-  InternalServerErrorException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { HrOperation } from './interfaces/hr-operation.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
-import { UpdateHrOperationDto } from './dto/update-hr-operation.dto';
-import { buildUpdateQuery } from '../../common/query.helper';
+import { EmployeeStatus } from './enums/employee-status.enum';
 
 @Injectable()
 export class HrOperationsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async findAll(): Promise<HrOperation[]> {
+  async findByEmployeeId(employeeId: number): Promise<HrOperation[]> {
     const query = `
       SELECT * 
       FROM hr_operations 
-      WHERE deleted_at IS NULL
+      WHERE employee_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
     `;
-    const result = await this.databaseService.query(query);
+    const result = await this.databaseService.query(query, [employeeId]);
     return result.rows as HrOperation[];
   }
 
-  async findOne(id: number): Promise<HrOperation> {
-    const query = `
-      SELECT * 
-      FROM hr_operations 
-      WHERE id = $1 AND deleted_at IS NULL
-    `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as HrOperation;
-  }
-
   async create(validatedDto: CreateHrOperationDto): Promise<HrOperation> {
-    const checkQuery = `
-      SELECT id 
-      FROM hr_operations 
-      WHERE employee_id = $1 AND deleted_at IS NULL
+    const employeeQuery = `
+      SELECT hr_status, current_department_id, current_position_id, current_salary 
+      FROM employees 
+      WHERE id = $1
     `;
-
-    const checkResult = await this.databaseService.query(checkQuery, [
+    const employeeResult = await this.databaseService.query(employeeQuery, [
       validatedDto.employee_id,
     ]);
+    const employee = employeeResult.rows[0];
 
-    if (checkResult.rows.length > 0) {
-      throw new BadRequestException('Employee already has HR record');
+    this.validateTransition(employee.hr_status, validatedDto.type);
+
+    const changes = this.findHrChanges(employee, validatedDto);
+
+    if (
+      validatedDto.type !== 'dismissal' &&
+      Object.keys(changes).length === 1
+    ) {
+      throw new BadRequestException('No changes detected for operation');
     }
 
-    const query = `
+    const operationQuery = `
       INSERT INTO hr_operations (
         employee_id, 
         type, 
@@ -60,112 +56,121 @@ export class HrOperationsService {
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-
     try {
-      const result = await this.databaseService.query(query, [
+      const operationResult = await this.databaseService.query(operationQuery, [
         validatedDto.employee_id,
         validatedDto.type,
-        validatedDto.department_id,
-        validatedDto.position_id,
-        validatedDto.salary,
+        changes.department_id,
+        changes.position_id,
+        changes.salary,
       ]);
-      return result.rows[0] as HrOperation;
+      const operation = operationResult.rows[0] as HrOperation;
+
+      await this.updateEmployeeState(validatedDto.employee_id, validatedDto);
+      return operation;
     } catch {
-      throw new InternalServerErrorException('Failed to create HR operation');
+      throw new InternalServerErrorException('Failed to create operation');
     }
   }
 
-  async update(
-    id: number,
-    validatedDto: UpdateHrOperationDto,
-  ): Promise<HrOperation> {
-    const current = await this.findOne(id);
+  private validateTransition(
+    currentStatus: EmployeeStatus,
+    operationType: string,
+  ) {
+    const allowed: Record<string, string[]> = {
+      [EmployeeStatus.NOT_HIRED]: ['hire'],
+      [EmployeeStatus.ACTIVE]: ['transfer', 'salary_change', 'dismissal'],
+      [EmployeeStatus.DISMISSED]: ['hire'],
+    };
 
-    const changes = this.prepareChanges(current, validatedDto);
-
-    if (Object.keys(changes).length === 0) {
-      return current;
-    }
-
-    const { query, values } = buildUpdateQuery('hr_operations', changes, id);
-
-    try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as HrOperation;
-    } catch {
-      throw new InternalServerErrorException('Failed to update HR operation');
-    }
-  }
-
-  async remove(id: number): Promise<HrOperation> {
-    const query = `
-      UPDATE hr_operations 
-      SET deleted_at = CURRENT_TIMESTAMP 
-      WHERE id = $1
-      RETURNING *
-    `;
-    try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as HrOperation;
-    } catch {
-      throw new InternalServerErrorException('Failed to delete HR operation');
-    }
-  }
-
-  private prepareChanges(
-    current: HrOperation,
-    value: UpdateHrOperationDto,
-  ): Partial<UpdateHrOperationDto> {
-    const changes: Partial<UpdateHrOperationDto> = {};
-
-    if (value.type === 'dismissal' && current.type !== 'dismissal') {
-      changes.type = 'dismissal';
-      changes.department_id = null;
-      changes.position_id = null;
-      changes.salary = null;
-      return changes;
-    }
-
-    if (value.type === 'hire' && current.type !== 'hire') {
-      if (
-        value.department_id === undefined ||
-        value.position_id === undefined ||
-        value.salary === undefined
-      ) {
-        throw new BadRequestException(
-          'For hire operation all fields must be provided: department_id, position_id, salary',
-        );
-      }
-
-      changes.type = 'hire';
-      changes.department_id = value.department_id;
-      changes.position_id = value.position_id;
-      changes.salary = value.salary;
-      return changes;
-    }
-
-    if (current.type === 'hire') {
-      if (
-        value.department_id !== undefined &&
-        value.department_id !== current.department_id
-      ) {
-        changes.department_id = value.department_id;
-      }
-      if (
-        value.position_id !== undefined &&
-        value.position_id !== current.position_id
-      ) {
-        changes.position_id = value.position_id;
-      }
-      if (value.salary !== undefined && value.salary !== current.salary) {
-        changes.salary = value.salary;
-      }
-    }
-
-    if (current.type === 'dismissal' && value.type !== 'hire') {
+    if (!allowed[currentStatus]?.includes(operationType)) {
       throw new BadRequestException(
-        'Cannot change fields for dismissed employee',
+        `Operation "${operationType}" not allowed for status "${currentStatus}"`,
       );
+    }
+  }
+
+  private async updateEmployeeState(
+    employeeId: number,
+    dto: CreateHrOperationDto,
+  ) {
+    let updateFields: any = {};
+
+    switch (dto.type) {
+      case 'hire':
+        updateFields = {
+          hr_status: 'ACTIVE',
+          current_department_id: dto.department_id,
+          current_position_id: dto.position_id,
+          current_salary: dto.salary,
+        };
+        break;
+      case 'transfer':
+        updateFields = {
+          current_department_id: dto.department_id,
+        };
+        break;
+      case 'salary_change':
+        updateFields = {
+          current_salary: dto.salary,
+        };
+        break;
+      case 'dismissal':
+        updateFields = {
+          hr_status: 'DISMISSED',
+          current_department_id: null,
+          current_position_id: null,
+          current_salary: null,
+        };
+        break;
+    }
+
+    if (Object.keys(updateFields).length > 0) {
+      const updateQuery = `
+        UPDATE employees 
+        SET ${Object.keys(updateFields)
+          .map((k, i) => `${k} = $${i + 2}`)
+          .join(', ')}
+        WHERE id = $1
+      `;
+
+      await this.databaseService.query(updateQuery, [
+        employeeId,
+        ...Object.values(updateFields),
+      ]);
+    }
+  }
+
+  private findHrChanges(
+    employee: any,
+    dto: CreateHrOperationDto,
+  ): Partial<CreateHrOperationDto> {
+    const changes: Partial<CreateHrOperationDto> = { type: dto.type };
+
+    switch (dto.type) {
+      case 'transfer':
+        if (
+          dto.department_id !== undefined &&
+          dto.department_id !== employee.current_department_id
+        ) {
+          changes.department_id = dto.department_id;
+        }
+        break;
+
+      case 'salary_change':
+        if (
+          dto.salary !== undefined &&
+          dto.salary !== employee.current_salary
+        ) {
+          changes.salary = dto.salary;
+        }
+        break;
+
+      case 'hire':
+        changes.department_id = dto.department_id;
+        changes.position_id = dto.position_id;
+        changes.salary = dto.salary;
+        break;
     }
     return changes;
   }

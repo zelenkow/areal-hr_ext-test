@@ -115,111 +115,29 @@ export class EmployeesService {
     value: UpdateEmployeeDto,
   ): Partial<UpdateEmployeeDto> {
     const changes: Partial<UpdateEmployeeDto> = {};
+    const fields: (keyof UpdateEmployeeDto)[] = [
+      'last_name',
+      'first_name',
+      'middle_name',
+      'birth_date',
+      'passport_series',
+      'passport_number',
+      'passport_issue_date',
+      'passport_issue_code',
+      'passport_issued_by',
+      'registration_region',
+      'registration_city',
+      'registration_street',
+      'registration_house',
+      'registration_building',
+      'registration_apartment',
+    ];
 
-    if (
-      value.last_name !== undefined &&
-      value.last_name !== current.last_name
-    ) {
-      changes.last_name = value.last_name;
-    }
-
-    if (
-      value.first_name !== undefined &&
-      value.first_name !== current.first_name
-    ) {
-      changes.first_name = value.first_name;
-    }
-
-    if (
-      value.middle_name !== undefined &&
-      value.middle_name !== current.middle_name
-    ) {
-      changes.middle_name = value.middle_name;
-    }
-
-    if (
-      value.birth_date !== undefined &&
-      value.birth_date !== current.birth_date
-    ) {
-      changes.birth_date = value.birth_date;
-    }
-
-    if (
-      value.passport_series !== undefined &&
-      value.passport_series !== current.passport_series
-    ) {
-      changes.passport_series = value.passport_series;
-    }
-
-    if (
-      value.passport_number !== undefined &&
-      value.passport_number !== current.passport_number
-    ) {
-      changes.passport_number = value.passport_number;
-    }
-
-    if (
-      value.passport_issue_date !== undefined &&
-      value.passport_issue_date !== current.passport_issue_date
-    ) {
-      changes.passport_issue_date = value.passport_issue_date;
-    }
-
-    if (
-      value.passport_issue_code !== undefined &&
-      value.passport_issue_code !== current.passport_issue_code
-    ) {
-      changes.passport_issue_code = value.passport_issue_code;
-    }
-
-    if (
-      value.passport_issued_by !== undefined &&
-      value.passport_issued_by !== current.passport_issued_by
-    ) {
-      changes.passport_issued_by = value.passport_issued_by;
-    }
-
-    if (
-      value.registration_region !== undefined &&
-      value.registration_region !== current.registration_region
-    ) {
-      changes.registration_region = value.registration_region;
-    }
-
-    if (
-      value.registration_city !== undefined &&
-      value.registration_city !== current.registration_city
-    ) {
-      changes.registration_city = value.registration_city;
-    }
-
-    if (
-      value.registration_street !== undefined &&
-      value.registration_street !== current.registration_street
-    ) {
-      changes.registration_street = value.registration_street;
-    }
-
-    if (
-      value.registration_house !== undefined &&
-      value.registration_house !== current.registration_house
-    ) {
-      changes.registration_house = value.registration_house;
-    }
-
-    if (
-      value.registration_building !== undefined &&
-      value.registration_building !== current.registration_building
-    ) {
-      changes.registration_building = value.registration_building;
-    }
-
-    if (
-      value.registration_apartment !== undefined &&
-      value.registration_apartment !== current.registration_apartment
-    ) {
-      changes.registration_apartment = value.registration_apartment;
-    }
+    fields.forEach((field) => {
+      if (value[field] !== undefined && value[field] !== current[field]) {
+        changes[field] = value[field];
+      }
+    });
 
     return changes;
   }

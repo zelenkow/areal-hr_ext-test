@@ -83,12 +83,18 @@
 
 <script setup lang="ts">
 import type { Position, CreatePositionDto, UpdatePositionDto } from '@/types/position'
+
+import { positionApi } from '@/services/position-api'
+
+import { formatDate } from '@/utils/helpers'
+
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
+
 import { ref, onMounted } from 'vue'
-import { positionApi } from '@/services/position-api'
+
 
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
@@ -117,10 +123,6 @@ const deleteMessage = ref('')
 onMounted(async () => {
   await loadData()
 })
-
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('ru-RU')
-}
 
 const loadData = async () => {
   positions.value = await positionApi.getPositions()

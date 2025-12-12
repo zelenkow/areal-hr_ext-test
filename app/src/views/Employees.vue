@@ -7,7 +7,10 @@
 
     <DataTable v-if="employees.length" striped hover>
       <template #headers>
-        <th>ФИО</th>
+        <th style="width: 25%">ФИО</th>
+        <th>Статус</th>
+        <th>Отдел</th>
+        <th>Должность</th>
         <th>Дата рождения</th>
       </template>
 
@@ -19,6 +22,9 @@
           @click="openDetailView(employee.id)"
         >
           <td>{{ formatFullName(employee) }}</td>
+          <td>{{ getEmployeeStatusText(employee.hr_status) }}</td>
+          <td>{{ getDepartmentName(employee.current_department_id) }}</td>
+          <td>{{ getPositionName(employee.current_position_id) }}</td>
           <td>{{ employee.birth_date }}</td>
         </tr>
       </template>
@@ -75,7 +81,7 @@
           type="text"
           v-model="newEmployee.birth_date"
           :class="{ error: showBirthDateError && !newEmployee.birth_date }"
-          placeholder="Введите дату в формате дд.мм.гггг"
+          placeholder="дд.мм.гггг"
         />
         <span v-if="showBirthDateError && !newEmployee.birth_date" class="error-text">
           Дата рождения обязательна
@@ -87,9 +93,16 @@
 
 <script setup lang="ts">
 import type { Employee, CreateEmployeeDto } from '@/types/employee'
+import type { Department } from '@/types/department'
+import type { Position } from '@/types/position'
+
 import { employeeApi } from '@/services/employee-api'
+import { departmentApi } from '@/services/department-api'
+import { positionApi } from '@/services/position-api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { getEmployeeStatusText } from '@/utils/helpers'
 
 import FormModal from '@/components/FormModal.vue'
 import AppButton from '@/components/AppButton.vue'
@@ -104,6 +117,8 @@ const showFirstNameError = ref(false)
 const showMiddleNameError = ref(false)
 const showBirthDateError = ref(false)
 
+const departments = ref<Department[]>([])
+const positions = ref<Position[]>([])
 const employees = ref<Employee[]>([])
 
 const newEmployee = ref<CreateEmployeeDto>({
@@ -126,10 +141,16 @@ const newEmployee = ref<CreateEmployeeDto>({
 
 onMounted(async () => {
   await loadData()
+  await loadReferenceData()
 })
 
 const loadData = async () => {
   employees.value = await employeeApi.getEmployees()
+}
+
+const loadReferenceData = async () => {
+  departments.value = await departmentApi.getDepartments()
+  positions.value = await positionApi.getPositions()
 }
 
 const openCreateModal = () => {
@@ -190,6 +211,18 @@ const resetNewForm = () => {
   showFirstNameError.value = false
   showBirthDateError.value = false
   showMiddleNameError.value = false
+}
+
+const getDepartmentName = (id: number | null): string => {
+  if (!id) return '—'
+  const department = departments.value.find((d) => d.id === id)
+  return department?.name || `Отдел #${id}`
+}
+
+const getPositionName = (id: number | null): string => {
+  if (!id) return '—'
+  const position = positions.value.find((p) => p.id === id)
+  return position?.name || `Должность #${id}`
 }
 
 const formatFullName = (employee: Employee): string => {

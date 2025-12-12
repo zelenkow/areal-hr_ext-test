@@ -128,12 +128,15 @@
 <script setup lang="ts">
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '@/types/department'
 import type { Organization } from '@/types/organization'
+
 import { departmentApi } from '@/services/department-api'
 import { organizationApi } from '@/services/organization-api'
+
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
+
 import { ref, onMounted } from 'vue'
 
 const showCreateModal = ref(false)
@@ -402,4 +405,5 @@ const resetEditForm = () => {
   white-space: normal;
   word-break: break-word;
 }
+
 </style>

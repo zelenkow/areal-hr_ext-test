@@ -166,6 +166,7 @@ import AppButton from '@/components/AppButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import EmployeePersonalTab from '@/views/employee-tabs/EmployeePersonalTab.vue'
 import EmployeeDocumentsTab from '@/views/employee-tabs/EmployeeDocumentsTab.vue'
+import EmployeeOperationsTab from '@/views/employee-tabs/EmployeeOperationsTab.vue'
 
 const route = useRoute()
 const router = useRouter()

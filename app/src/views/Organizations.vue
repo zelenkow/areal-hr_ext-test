@@ -108,11 +108,16 @@ import type {
   CreateOrganizationDto,
   UpdateOrganizationDto,
 } from '@/types/organization'
+
+import { formatDate } from '@/utils/helpers'
+
 import { organizationApi } from '@/services/organization-api'
+
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import DataTable from '@/components/DataTable.vue'
+
 import { ref, onMounted } from 'vue'
 
 const showCreateModal = ref(false)
@@ -145,10 +150,6 @@ const deleteMessage = ref('')
 onMounted(async () => {
   await loadData()
 })
-
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('ru-RU')
-}
 
 const loadData = async () => {
   organizations.value = await organizationApi.getOrganizations()

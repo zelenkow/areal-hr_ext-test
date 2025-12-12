@@ -17,12 +17,8 @@
           <td>{{ file.name }}</td>
           <td>{{ formatDate(file.created_at) }}</td>
           <td class="actions">
-            <AppButton variant="secondary" size="small" @click="handleDownload(file)">
-              Скачать
-            </AppButton>
-            <AppButton variant="danger" size="small" @click="openDeleteModal(file.id)">
-              Удалить
-            </AppButton>
+            <AppButton variant="secondary" @click="handleDownload(file)"> Скачать </AppButton>
+            <AppButton variant="danger" @click="openDeleteModal(file.id)"> Удалить </AppButton>
           </td>
         </tr>
       </template>
@@ -79,14 +75,18 @@
 
 <script setup lang="ts">
 import type { FileEntity } from '@/types/file'
-import { ref, onMounted } from 'vue'
+
 import { fileApi } from '@/services/file-api'
 import { filesize } from 'filesize'
+
+import { formatDate } from '@/utils/helpers'
 
 import AppButton from '@/components/AppButton.vue'
 import FormModal from '@/components/FormModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import DataTable from '@/components/DataTable.vue'
+
+import { ref, onMounted } from 'vue'
 
 interface Props {
   employeeId: number
@@ -201,10 +201,6 @@ const handleDownload = async (file: FileEntity) => {
   document.body.removeChild(a)
 }
 
-const formatDate = (dateStr: string | Date) => {
-  return new Date(dateStr).toLocaleDateString('ru-RU')
-}
-
 const formatFileSize = (bytes: number) => filesize(bytes, { locale: 'ru', precision: 2 })
 </script>
 
@@ -231,12 +227,6 @@ const formatFileSize = (bytes: number) => filesize(bytes, { locale: 'ru', precis
   padding: 3rem;
   color: #6c757d;
   font-style: italic;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-  white-space: nowrap;
 }
 
 .form-group {

@@ -1,3 +1,5 @@
+import { EmployeeStatus } from '../../hr_operations/enums/employee-status.enum';
+
 export interface Employee {
   id: number;
   last_name: string;
@@ -15,6 +17,10 @@ export interface Employee {
   registration_house: string;
   registration_building: string;
   registration_apartment: string;
+  hr_status: EmployeeStatus;
+  current_department_id: number | null;
+  current_position_id: number | null;
+  current_salary: number | null;
   created_at: Date;
   deleted_at: Date | null;
   updated_at: Date;
