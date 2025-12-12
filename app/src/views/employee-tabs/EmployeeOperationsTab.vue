@@ -121,7 +121,7 @@ import { getEmployeeStatusText, formatDate } from '@/utils/helpers'
 import { hrOperationApi } from '@/services/hr-operation-api'
 import { departmentApi } from '@/services/department-api'
 import { positionApi } from '@/services/position-api'
-import { employeeApi } from '@/services/employee-api';
+import { employeeApi } from '@/services/employee-api'
 
 import AppButton from '@/components/AppButton.vue'
 import FormModal from '@/components/FormModal.vue'
@@ -195,7 +195,7 @@ const showSalaryField = computed(() => {
 })
 
 const openCreateModal = async () => {
-  const employee = await employeeApi.getEmployeeById(props.employeeId);
+  const employee = await employeeApi.getEmployeeById(props.employeeId)
 
   originalValues.value = {
     employee_id: props.employeeId,
@@ -203,7 +203,7 @@ const openCreateModal = async () => {
     department_id: employee.current_department_id,
     position_id: employee.current_position_id,
     salary: employee.current_salary,
-  };
+  }
 
   newOperation.value = {
     employee_id: props.employeeId,
@@ -211,13 +211,12 @@ const openCreateModal = async () => {
     department_id: employee.current_department_id,
     position_id: employee.current_position_id,
     salary: employee.current_salary,
-  };
+  }
 
   showCreateModal.value = true
 }
 
 const createOperation = async () => {
-
   if (!validateOperation()) {
     return
   }
@@ -239,7 +238,6 @@ const createOperation = async () => {
 }
 
 const validateOperation = (): boolean => {
-
   let isValid = true
 
   if (!newOperation.value.type) {
@@ -248,7 +246,6 @@ const validateOperation = (): boolean => {
   }
 
   switch (newOperation.value.type) {
-
     case 'hire':
       if (!newOperation.value.department_id || newOperation.value.department_id <= 0) {
         showDepartmentError.value = true
@@ -298,7 +295,8 @@ const buildOperationData = (): CreateHrOperationDto | null => {
   }
 
   if (newOperation.value.type === 'transfer') {
-    const departmentChanged = newOperation.value.department_id !== originalValues.value.department_id
+    const departmentChanged =
+      newOperation.value.department_id !== originalValues.value.department_id
 
     if (departmentChanged) {
       dataToSend.department_id = newOperation.value.department_id

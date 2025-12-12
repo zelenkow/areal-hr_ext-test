@@ -405,5 +405,4 @@ const resetEditForm = () => {
   white-space: normal;
   word-break: break-word;
 }
-
 </style>

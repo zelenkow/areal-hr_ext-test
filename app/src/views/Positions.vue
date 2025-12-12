@@ -95,7 +95,6 @@ import DataTable from '@/components/DataTable.vue'
 
 import { ref, onMounted } from 'vue'
 
-
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
