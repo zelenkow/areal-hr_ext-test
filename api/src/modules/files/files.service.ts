@@ -15,8 +15,8 @@ export class FilesService {
       ORDER BY created_at DESC
     `;
 
-    const result = await this.databaseService.query(query, [employeeId]);
-    return result.rows as File[];
+    const result = await this.databaseService.query<File>(query, [employeeId]);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<File> {
@@ -25,8 +25,8 @@ export class FilesService {
       FROM files 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as File;
+    const result = await this.databaseService.query<File>(query, [id]);
+    return result.rows[0];
   }
 
   async create(
@@ -41,12 +41,12 @@ export class FilesService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<File>(query, [
         validatedDto.employee_id,
         validatedDto.name,
         validatedDto.file_path,
       ]);
-      return result.rows[0] as File;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create file');
     }
@@ -60,8 +60,8 @@ export class FilesService {
       RETURNING *
     `;
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as File;
+      const result = await this.databaseService.query<File>(query, [id]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete file');
     }

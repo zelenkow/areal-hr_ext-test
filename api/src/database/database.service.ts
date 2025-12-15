@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool } from 'pg';
+import { Pool, QueryResult } from 'pg';
 
 @Injectable()
 export class DatabaseService {
@@ -14,10 +14,13 @@ export class DatabaseService {
     });
   }
 
-  async query(text: string, params?: any[]) {
+  async query<T>(
+    text: string,
+    params?: (string | number | null | Date)[],
+  ): Promise<QueryResult<T>> {
     const client = await this.pool.connect();
     try {
-      const result = await client.query(text, params);
+      const result = await client.query<T>(text, params);
       return result;
     } finally {
       client.release();

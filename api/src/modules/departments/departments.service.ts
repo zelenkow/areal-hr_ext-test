@@ -16,8 +16,8 @@ export class DepartmentsService {
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as Department[];
+    const result = await this.databaseService.query<Department>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<Department> {
@@ -26,8 +26,8 @@ export class DepartmentsService {
       FROM departments 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as Department;
+    const result = await this.databaseService.query<Department>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validateDto: CreateDepartmentDto): Promise<Department> {
@@ -38,13 +38,13 @@ export class DepartmentsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<Department>(query, [
         validateDto.organization_id,
         validateDto.name,
         validateDto.parent_id,
         validateDto.comment,
       ]);
-      return result.rows[0] as Department;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create department');
     }
@@ -65,8 +65,11 @@ export class DepartmentsService {
     const { query, values } = buildUpdateQuery('departments', changes, id);
 
     try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as Department;
+      const result = await this.databaseService.query<Department>(
+        query,
+        values,
+      );
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to update department');
     }
@@ -81,8 +84,8 @@ export class DepartmentsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as Department;
+      const result = await this.databaseService.query<Department>(query, [id]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete department');
     }

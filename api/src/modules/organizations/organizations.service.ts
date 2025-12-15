@@ -16,8 +16,8 @@ export class OrganizationsService {
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as Organization[];
+    const result = await this.databaseService.query<Organization>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<Organization> {
@@ -26,8 +26,8 @@ export class OrganizationsService {
       FROM organizations 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as Organization;
+    const result = await this.databaseService.query<Organization>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validatedDto: CreateOrganizationDto): Promise<Organization> {
@@ -38,11 +38,11 @@ export class OrganizationsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<Organization>(query, [
         validatedDto.name,
         validatedDto.comment,
       ]);
-      return result.rows[0] as Organization;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create organization');
     }
@@ -63,8 +63,11 @@ export class OrganizationsService {
     const { query, values } = buildUpdateQuery('organizations', changes, id);
 
     try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as Organization;
+      const result = await this.databaseService.query<Organization>(
+        query,
+        values,
+      );
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to update organization');
     }
@@ -78,8 +81,10 @@ export class OrganizationsService {
       RETURNING *
     `;
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as Organization;
+      const result = await this.databaseService.query<Organization>(query, [
+        id,
+      ]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete organization');
     }

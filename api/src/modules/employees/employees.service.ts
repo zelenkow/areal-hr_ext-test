@@ -16,8 +16,8 @@ export class EmployeesService {
       WHERE deleted_at IS NULL
       ORDER BY last_name ASC, first_name ASC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as Employee[];
+    const result = await this.databaseService.query<Employee>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<Employee> {
@@ -26,8 +26,8 @@ export class EmployeesService {
       FROM employees 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as Employee;
+    const result = await this.databaseService.query<Employee>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validatedDto: CreateEmployeeDto): Promise<Employee> {
@@ -54,7 +54,7 @@ export class EmployeesService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<Employee>(query, [
         validatedDto.last_name,
         validatedDto.first_name,
         validatedDto.middle_name,
@@ -71,7 +71,7 @@ export class EmployeesService {
         validatedDto.registration_building,
         validatedDto.registration_apartment,
       ]);
-      return result.rows[0] as Employee;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create employee');
     }
@@ -88,8 +88,8 @@ export class EmployeesService {
     const { query, values } = buildUpdateQuery('employees', changes, id);
 
     try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as Employee;
+      const result = await this.databaseService.query<Employee>(query, values);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to update employee');
     }
@@ -103,8 +103,8 @@ export class EmployeesService {
       RETURNING *
     `;
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as Employee;
+      const result = await this.databaseService.query<Employee>(query, [id]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete employee');
     }

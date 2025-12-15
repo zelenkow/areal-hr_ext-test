@@ -7,6 +7,7 @@ import { HrOperation } from './interfaces/hr-operation.interface';
 import { DatabaseService } from '../../database/database.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
 import { EmployeeStatus } from './enums/employee-status.enum';
+import { Employee } from '../employees/interfaces/employee.interface';
 
 @Injectable()
 export class HrOperationsService {
@@ -19,8 +20,10 @@ export class HrOperationsService {
       WHERE employee_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
     `;
-    const result = await this.databaseService.query(query, [employeeId]);
-    return result.rows as HrOperation[];
+    const result = await this.databaseService.query<HrOperation>(query, [
+      employeeId,
+    ]);
+    return result.rows;
   }
 
   async create(validatedDto: CreateHrOperationDto): Promise<HrOperation> {
@@ -29,9 +32,9 @@ export class HrOperationsService {
       FROM employees 
       WHERE id = $1
     `;
-    const employeeResult = await this.databaseService.query(employeeQuery, [
-      validatedDto.employee_id,
-    ]);
+    const employeeResult = await this.databaseService.query<Employee>(
+      employeeQuery[validatedDto.employee_id],
+    );
     const employee = employeeResult.rows[0];
 
     this.validateTransition(employee.hr_status, validatedDto.type);
@@ -94,7 +97,12 @@ export class HrOperationsService {
     employeeId: number,
     dto: CreateHrOperationDto,
   ) {
-    let updateFields: any = {};
+    let updateFields: {
+      hr_status?: 'ACTIVE' | 'DISMISSED';
+      current_department_id?: number | null;
+      current_position_id?: number | null;
+      current_salary?: number | null;
+    } = {};
 
     switch (dto.type) {
       case 'hire':

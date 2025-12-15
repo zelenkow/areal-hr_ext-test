@@ -14,8 +14,8 @@ export class AuditLogsService {
       WHERE deleted_at IS NULL
       ORDER BY created_at DESC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as AuditLog[];
+    const result = await this.databaseService.query<AuditLog>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<AuditLog> {
@@ -24,8 +24,8 @@ export class AuditLogsService {
       FROM audit_log 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as AuditLog;
+    const result = await this.databaseService.query<AuditLog>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validatedDto: CreateAuditLogDto): Promise<AuditLog> {
@@ -43,7 +43,7 @@ export class AuditLogsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<AuditLog>(query, [
         validatedDto.user_id,
         validatedDto.entity_type,
         validatedDto.entity_id,
@@ -51,7 +51,7 @@ export class AuditLogsService {
         validatedDto.old_value,
         validatedDto.new_value,
       ]);
-      return result.rows[0] as AuditLog;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create audit log');
     }

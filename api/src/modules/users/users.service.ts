@@ -16,8 +16,8 @@ export class UsersService {
       WHERE deleted_at IS NULL
       ORDER BY last_name ASC, first_name ASC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as User[];
+    const result = await this.databaseService.query<User>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<User> {
@@ -26,8 +26,8 @@ export class UsersService {
       FROM users 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as User;
+    const result = await this.databaseService.query<User>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validatedDto: CreateUserDto): Promise<User> {
@@ -51,7 +51,7 @@ export class UsersService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<User>(query, [
         validatedDto.last_name,
         validatedDto.first_name,
         validatedDto.middle_name,
@@ -59,7 +59,7 @@ export class UsersService {
         hashedPassword,
         validatedDto.role,
       ]);
-      return result.rows[0] as User;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create user');
     }
@@ -96,8 +96,8 @@ export class UsersService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as User;
+      const result = await this.databaseService.query<User>(query, values);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to update user');
     }
@@ -111,8 +111,8 @@ export class UsersService {
       RETURNING id, last_name, first_name, middle_name, login, role, created_at, updated_at, deleted_at
     `;
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as User;
+      const result = await this.databaseService.query<User>(query, [id]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete employee');
     }

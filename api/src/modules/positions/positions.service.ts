@@ -16,8 +16,8 @@ export class PositionsService {
       WHERE deleted_at IS NULL
       ORDER BY name ASC
     `;
-    const result = await this.databaseService.query(query);
-    return result.rows as Position[];
+    const result = await this.databaseService.query<Position>(query);
+    return result.rows;
   }
 
   async findOne(id: number): Promise<Position> {
@@ -26,8 +26,8 @@ export class PositionsService {
       FROM positions 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    const result = await this.databaseService.query(query, [id]);
-    return result.rows[0] as Position;
+    const result = await this.databaseService.query<Position>(query, [id]);
+    return result.rows[0];
   }
 
   async create(validateDto: CreatePositionDto): Promise<Position> {
@@ -38,10 +38,10 @@ export class PositionsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [
+      const result = await this.databaseService.query<Position>(query, [
         validateDto.name,
       ]);
-      return result.rows[0] as Position;
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to create position');
     }
@@ -59,8 +59,8 @@ export class PositionsService {
     const { query, values } = buildUpdateQuery('positions', changes, id);
 
     try {
-      const result = await this.databaseService.query(query, values);
-      return result.rows[0] as Position;
+      const result = await this.databaseService.query<Position>(query, values);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to update position');
     }
@@ -75,8 +75,8 @@ export class PositionsService {
     `;
 
     try {
-      const result = await this.databaseService.query(query, [id]);
-      return result.rows[0] as Position;
+      const result = await this.databaseService.query<Position>(query, [id]);
+      return result.rows[0];
     } catch {
       throw new InternalServerErrorException('Failed to delete position');
     }
