@@ -144,7 +144,7 @@ const editingOrganization = ref<UpdateOrganizationDto>({
   comment: '',
 })
 
-const organizationToDelete = ref(0)
+const organizationToDelete = ref<number | null>(null)
 const deleteMessage = ref('')
 
 onMounted(async () => {
@@ -226,7 +226,7 @@ const openDeleteModal = (id: number, name: string) => {
 }
 
 const confirmDelete = async () => {
-  await organizationApi.deleteOrganization(organizationToDelete.value)
+  await organizationApi.deleteOrganization(organizationToDelete.value!)
   await loadData()
   closeDeleteModal()
 }

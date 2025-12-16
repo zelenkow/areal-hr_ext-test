@@ -116,7 +116,7 @@ const editingPosition = ref<UpdatePositionDto>({
   name: '',
 })
 
-const positionToDelete = ref(0)
+const positionToDelete = ref<number | null>(null)
 const deleteMessage = ref('')
 
 onMounted(async () => {
@@ -191,7 +191,7 @@ const openDeleteModal = (id: number, name: string) => {
 }
 
 const confirmDelete = async () => {
-  await positionApi.deletePosition(positionToDelete.value)
+  await positionApi.deletePosition(positionToDelete.value!)
   await loadData()
   closeDeleteModal()
 }

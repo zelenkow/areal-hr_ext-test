@@ -167,7 +167,7 @@ const editingDepartment = ref<UpdateDepartmentDto>({
   comment: '',
 })
 
-const departmentToDelete = ref(0)
+const departmentToDelete = ref<number | null>(null)
 const deleteMessage = ref('')
 
 onMounted(async () => {
@@ -261,7 +261,7 @@ const openDeleteModal = (id: number, name: string) => {
 }
 
 const confirmDelete = async () => {
-  await departmentApi.deleteDepartment(departmentToDelete.value)
+  await departmentApi.deleteDepartment(departmentToDelete.value!)
   await loadData()
   closeDeleteModal()
 }
