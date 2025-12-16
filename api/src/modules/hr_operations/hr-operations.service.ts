@@ -33,7 +33,8 @@ export class HrOperationsService {
       WHERE id = $1
     `;
     const employeeResult = await this.databaseService.query<Employee>(
-      employeeQuery[validatedDto.employee_id],
+      employeeQuery,
+      [validatedDto.employee_id],
     );
     const employee = employeeResult.rows[0];
 
