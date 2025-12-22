@@ -139,4 +139,15 @@ export class UsersService {
 
     return changes;
   }
+
+  async findByLogin(login: string): Promise<User | null> {
+    const query = `
+      SELECT *
+    FROM users 
+    WHERE login = $1 AND deleted_at IS NULL
+  `;
+
+    const result = await this.databaseService.query<User>(query, [login]);
+    return result.rows[0] || null;
+  }
 }
