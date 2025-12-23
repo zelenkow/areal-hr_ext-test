@@ -7,16 +7,33 @@
       <router-link to="/users" class="nav-link"> Пользователи </router-link>
       <router-link to="/employees" class="nav-link"> Сотрудники </router-link>
 
+      <AppButton
+        variant="danger"
+        @click="handleLogout"
+        class="logout-btn"
+      >
+        Выйти
+      </AppButton>
+
     </nav>
 
     <main class="main-content">
-      <RouterView />
+      <RouterView/>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
+import { authApi } from '@/services/auth-api'
+import AppButton from '@/components/AppButton.vue'
+
+const router = useRouter()
+
+const handleLogout = async () => {
+  await authApi.logout()
+  router.push('/')
+}
 </script>
 
 <style>
@@ -51,6 +68,10 @@ import { RouterView } from 'vue-router'
 .nav-link.router-link-active {
   background: #42b983;
   color: white;
+}
+
+.logout-btn {
+  margin-left: auto;
 }
 
 .main-content {
