@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav class="main-nav">
+    <nav v-if="isAuthenticated" class="main-nav">
       <router-link to="/organizations" class="nav-link"> Организации </router-link>
       <router-link to="/departments" class="nav-link"> Отделы </router-link>
       <router-link to="/positions" class="nav-link"> Должности </router-link>
@@ -26,12 +26,41 @@
 <script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
 import { authApi } from '@/services/auth-api'
+import { ref, onMounted, onUnmounted } from 'vue'
+
 import AppButton from '@/components/AppButton.vue'
 
 const router = useRouter()
+const isAuthenticated = ref(false)
+
+onMounted(() => {
+  checkAuth()
+  window.addEventListener('auth-changed', handleAuthChange)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('auth-changed', handleAuthChange)
+})
+
+const checkAuth = async () => {
+  try {
+    await authApi.checkAuth()
+    isAuthenticated.value = true
+  } catch {
+    isAuthenticated.value = false
+  }
+}
+
+const handleAuthChange = (event: Event) => {
+  const customEvent = event as CustomEvent<boolean>
+  isAuthenticated.value = customEvent.detail
+}
 
 const handleLogout = async () => {
   await authApi.logout()
+  window.dispatchEvent(new CustomEvent('auth-changed', {
+    detail: false
+  }))
   router.push('/')
 }
 </script>

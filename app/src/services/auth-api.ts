@@ -33,4 +33,16 @@ export const authApi = {
       throw new Error('Failed quit session')
     }
   },
+  async checkAuth(): Promise<AuthResponse> {
+    const response = await fetch(`api/auth/check`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      throw new Error('No session')
+    }
+
+    return await response.json()
+  },
 }

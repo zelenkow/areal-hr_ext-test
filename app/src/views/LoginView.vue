@@ -90,6 +90,10 @@ const handleLogin = async () => {
   try {
     await authApi.login(credentials.value)
 
+    window.dispatchEvent(new CustomEvent('auth-changed', {
+      detail: true
+    }))
+
     router.push('/organizations')
 
   } catch (error) {

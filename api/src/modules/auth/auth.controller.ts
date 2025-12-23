@@ -1,7 +1,8 @@
-import { Controller, Post, UseGuards, Request, Res } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Res, Get } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { RequestWithUser } from './types/auth.types';
+import { SessionGuard } from './guards/session.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,5 +22,11 @@ export class AuthController {
         res.sendStatus(200);
       });
     });
+  }
+
+  @Get('check')
+  @UseGuards(SessionGuard)
+  checkAuth(@Request() req: RequestWithUser) {
+    return req.user;
   }
 }
