@@ -6,11 +6,14 @@ import {
   Param,
   ParseIntPipe,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { HrOperationsService } from './hr-operations.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
 import { CreateHrOperationSchema } from './schemas/create-hr-operation.schema';
+import { SessionGuard } from '../auth/guards/session.guard';
 
+@UseGuards(SessionGuard)
 @Controller('hr-operations')
 export class HrOperationsController {
   constructor(private readonly hrOperationsService: HrOperationsService) {}

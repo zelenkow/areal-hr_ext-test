@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
@@ -18,7 +19,9 @@ import { CreateFileSchema } from './schemas/create-file.schema';
 import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { Response } from 'express';
+import { SessionGuard } from '../auth/guards/session.guard';
 
+@UseGuards(SessionGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}

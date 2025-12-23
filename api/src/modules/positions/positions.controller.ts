@@ -8,13 +8,16 @@ import {
   Patch,
   Delete,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
 import { CreatePositionSchema } from './schemas/create-position.schema';
 import { UpdatePositionSchema } from './schemas/update-position.schema';
+import { SessionGuard } from '../auth/guards/session.guard';
 
+@UseGuards(SessionGuard)
 @Controller('positions')
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}

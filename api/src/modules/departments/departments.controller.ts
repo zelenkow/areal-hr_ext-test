@@ -8,13 +8,16 @@ import {
   Patch,
   Delete,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { CreateDepartmentSchema } from './schemas/create-department.schema';
 import { UpdateDepartmentSchema } from './schemas/update-department.schema';
+import { SessionGuard } from '../auth/guards/session.guard';
 
+@UseGuards(SessionGuard)
 @Controller('departments')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
