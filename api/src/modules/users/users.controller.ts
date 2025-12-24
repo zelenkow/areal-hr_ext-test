@@ -16,9 +16,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserSchema } from './schemas/create-user.schema';
 import { UpdateUserSchema } from './schemas/update-user.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/guards/roles.guard';
 
-@UseGuards(SessionGuard)
+@UseGuards(SessionGuard, RolesGuard)
 @Controller('users')
+@Roles('admin')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
