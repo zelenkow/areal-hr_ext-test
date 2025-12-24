@@ -23,8 +23,6 @@ services:
       DATABASE_URL: ${DOCKER_DATABASE_URL}
     env_file:
       - .env
-    ports:
-      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,11 +34,10 @@ services:
   app:
     build:
       context: .
-      dockerfile: containers/app/Dockerfile
-    ports:
-      - "5173:5173"
+      dockerfile: containers/app/Dockerfile 
     depends_on:
       - api
+    
     command: npm run dev
 
   nginx:

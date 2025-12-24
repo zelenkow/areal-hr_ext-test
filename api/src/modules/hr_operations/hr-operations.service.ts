@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { HrOperation } from './interfaces/hr-operation.interface';
 import { DatabaseService } from '../../database/database.service';
@@ -36,6 +37,11 @@ export class HrOperationsService {
       employeeQuery,
       [validatedDto.employee_id],
     );
+
+    if (!employeeResult.rows[0]) {
+      throw new NotFoundException('Employee not found');
+    }
+
     const employee = employeeResult.rows[0];
 
     this.validateTransition(employee.hr_status, validatedDto.type);
