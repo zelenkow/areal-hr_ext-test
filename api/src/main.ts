@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { UsersService } from './modules/users/users.service';
 import * as session from 'express-session';
 import * as passport from 'passport';
 
@@ -23,6 +24,10 @@ async function bootstrap() {
     origin: ['http://localhost', 'http://localhost:5173'],
     credentials: true,
   });
+
+  const usersService = app.get(UsersService);
+  await usersService.seedDefaultAdmin();
+
   await app.listen(3000);
 }
 bootstrap();

@@ -25,3 +25,4 @@
 - **Создать .env по образцу .env.example в корне проекта**
 - **Запустить команду docker-compose up --build**
 - **Открыть ссылку http://localhost**
+- **Login: admin Password: admin** 

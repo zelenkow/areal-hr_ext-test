@@ -2,7 +2,7 @@ import type { LoginData, AuthResponse } from '@/types/auth'
 
 export const authApi = {
   async login(loginData: LoginData): Promise<AuthResponse> {
-    const response = await fetch(`api/auth/login`, {
+    const response = await fetch(`/api/auth/login`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -20,7 +20,7 @@ export const authApi = {
   },
 
   async logout(): Promise<void> {
-    const response = await fetch(`api/auth/logout`, {
+    const response = await fetch(`/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -33,16 +33,19 @@ export const authApi = {
       throw new Error('Failed quit session')
     }
   },
-  async checkAuth(): Promise<AuthResponse> {
-    const response = await fetch(`api/auth/check`, {
-      method: 'GET',
-      credentials: 'include',
-    })
+ async checkAuth(): Promise<AuthResponse> {
+  const response = await fetch(`/api/auth/check`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
 
-    if (!response.ok) {
-      throw new Error('No session')
-    }
+  if (!response.ok) {
+    throw new Error('No session')
+  }
 
-    return await response.json()
-  },
+  return await response.json()
+}
 }

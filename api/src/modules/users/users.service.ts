@@ -150,4 +150,46 @@ export class UsersService {
     const result = await this.databaseService.query<User>(query, [login]);
     return result.rows[0] || null;
   }
+
+  async seedDefaultAdmin(): Promise<void> {
+    try {
+      const checkQuery = `
+        SELECT id 
+        FROM users 
+        WHERE login = $1 AND deleted_at IS NULL
+      `;
+      const result = await this.databaseService.query(checkQuery, ['admin']);
+
+      if (result.rows.length > 0) {
+        return;
+      }
+
+      const hashedPassword = await argon2.hash('admin', {
+        type: argon2.argon2id,
+        memoryCost: 65536,
+        timeCost: 3,
+      });
+
+      const createQuery = `
+        INSERT INTO users (
+          last_name, 
+          first_name, 
+          middle_name,
+          login,
+          password_hash,
+          role
+        ) VALUES ($1, $2, $3, $4, $5, $6)
+      `;
+      await this.databaseService.query(createQuery, [
+        'Системный',
+        'Администратор',
+        'Администратович',
+        'admin',
+        hashedPassword,
+        'admin',
+      ]);
+    } catch {
+      throw new InternalServerErrorException('Failed to create administrator');
+    }
+  }
 }
