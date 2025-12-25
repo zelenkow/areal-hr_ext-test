@@ -17,8 +17,8 @@ import { CreateEmployeeSchema } from './schemas/create-employee.schema';
 import { UpdateEmployeeSchema } from './schemas/update-employee.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('employees')
+@UseGuards(SessionGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 

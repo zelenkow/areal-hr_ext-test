@@ -17,8 +17,8 @@ import { CreateDepartmentSchema } from './schemas/create-department.schema';
 import { UpdateDepartmentSchema } from './schemas/update-department.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('departments')
+@UseGuards(SessionGuard)
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 

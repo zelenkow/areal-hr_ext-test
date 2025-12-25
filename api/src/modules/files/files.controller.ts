@@ -21,8 +21,8 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { Response } from 'express';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('files')
+@UseGuards(SessionGuard)
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 

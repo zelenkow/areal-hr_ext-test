@@ -17,8 +17,8 @@ import { CreateOrganizationSchema } from './schemas/create-organization.schema';
 import { UpdateOrganizationSchema } from './schemas/update-organization.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('organizations')
+@UseGuards(SessionGuard)
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 

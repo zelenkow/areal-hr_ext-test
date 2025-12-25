@@ -13,8 +13,8 @@ import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { CreateAuditLogSchema } from './schemas/create-audit-log.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('audit-logs')
+@UseGuards(SessionGuard)
 export class AuditLogsController {
   constructor(private readonly auditLogsService: AuditLogsService) {}
 

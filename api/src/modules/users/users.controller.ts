@@ -19,8 +19,8 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/guards/roles.guard';
 
-@UseGuards(SessionGuard, RolesGuard)
 @Controller('users')
+@UseGuards(SessionGuard, RolesGuard)
 @Roles('admin')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

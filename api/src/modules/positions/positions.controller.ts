@@ -17,8 +17,8 @@ import { CreatePositionSchema } from './schemas/create-position.schema';
 import { UpdatePositionSchema } from './schemas/update-position.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('positions')
+@UseGuards(SessionGuard)
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}
 

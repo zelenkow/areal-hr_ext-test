@@ -13,8 +13,8 @@ import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
 import { CreateHrOperationSchema } from './schemas/create-hr-operation.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
 
-@UseGuards(SessionGuard)
 @Controller('hr-operations')
+@UseGuards(SessionGuard)
 export class HrOperationsController {
   constructor(private readonly hrOperationsService: HrOperationsService) {}
 
