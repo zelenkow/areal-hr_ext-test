@@ -56,4 +56,27 @@ export class AuditLogsService {
       throw new InternalServerErrorException('Failed to create audit log');
     }
   }
+
+  async log(data: any): Promise<void> {
+    const query = `
+      INSERT INTO audit_log (
+        user_id,  
+        entity_type, 
+        entity_id,
+        old_data, 
+        new_data
+      ) 
+      VALUES ($1, $2, $3, $4, $5)
+    `;
+
+    const params = [
+      data.user_id,
+      data.entity_type,
+      data.entity_id,
+      data.old_data ? JSON.stringify(data.old_data) : null,
+      JSON.stringify(data.new_data),
+    ];
+
+    await this.databaseService.query(query, params);
+  }
 }
