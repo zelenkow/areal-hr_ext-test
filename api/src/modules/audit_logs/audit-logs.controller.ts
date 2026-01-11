@@ -28,6 +28,11 @@ export class AuditLogsController {
     return this.auditLogsService.findOne(id);
   }
 
+  @Get(':id/diff')
+  async getLogWithDiff(@Param('id') id: number) {
+    return this.auditLogsService.findOneWithDiff(id);
+  }
+
   @Post()
   async create(@Body() createAuditLogDto: CreateAuditLogDto) {
     const { error, value } = CreateAuditLogSchema.validate(createAuditLogDto);

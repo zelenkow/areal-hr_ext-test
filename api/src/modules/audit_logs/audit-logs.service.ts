@@ -79,4 +79,49 @@ export class AuditLogsService {
 
     await this.databaseService.query(query, params);
   }
+
+  async findOneWithDiff(id: number): Promise<any> {
+    const log = await this.findOne(id);
+
+    const changes = this.calculateDiff(log.old_data, log.new_data);
+
+    return { changes };
+  }
+
+  private calculateDiff(oldData: any, newData: any): any[] {
+    const changes = [];
+
+    if (!oldData && newData) {
+      for (const field in newData) {
+        changes.push({
+          field: field,
+          old: '',
+          new: newData[field],
+        });
+      }
+      return changes;
+    }
+
+    if (oldData && newData) {
+      const allFields = new Set([
+        ...Object.keys(oldData || {}),
+        ...Object.keys(newData || {}),
+      ]);
+
+      for (const field of allFields) {
+        const oldValue = oldData[field];
+        const newValue = newData[field];
+
+        if (oldValue !== newValue) {
+          changes.push({
+            field: field,
+            old: oldValue,
+            new: newValue,
+          });
+        }
+      }
+    }
+
+    return changes;
+  }
 }

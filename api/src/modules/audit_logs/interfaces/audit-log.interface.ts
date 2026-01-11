@@ -3,9 +3,8 @@ export interface AuditLog {
   user_id: number;
   entity_type: string;
   entity_id: number;
-  field_name: string;
-  old_value: string;
-  new_value: string;
+  old_data: any;
+  new_data: any;
   created_at: Date;
   deleted_at: Date | null;
   updated_at: Date;
