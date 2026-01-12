@@ -4,8 +4,9 @@
       <router-link to="/organizations" class="nav-link"> Организации </router-link>
       <router-link to="/departments" class="nav-link"> Отделы </router-link>
       <router-link to="/positions" class="nav-link"> Должности </router-link>
-      <router-link to="/users" class="nav-link"> Пользователи </router-link>
+      <router-link v-if="user?.role === 'admin'" to="/users" class="nav-link"> Пользователи </router-link>
       <router-link to="/employees" class="nav-link"> Сотрудники </router-link>
+      <router-link v-if="user?.role === 'admin'" to="/audit_logs" class="nav-link"> Логи </router-link>
 
       <AppButton
         variant="danger"
@@ -28,10 +29,13 @@ import { RouterView, useRouter } from 'vue-router'
 import { authApi } from '@/services/auth-api'
 import { ref, onMounted, onUnmounted } from 'vue'
 
+import type { AuthResponse } from '@/types/auth'
+
 import AppButton from '@/components/AppButton.vue'
 
 const router = useRouter()
 const isAuthenticated = ref(false)
+const user = ref<AuthResponse | null>(null)
 
 onMounted(() => {
   checkAuth()
@@ -44,16 +48,24 @@ onUnmounted(() => {
 
 const checkAuth = async () => {
   try {
-    await authApi.checkAuth()
+    const userData = await authApi.checkAuth()
     isAuthenticated.value = true
+    user.value = userData
   } catch {
     isAuthenticated.value = false
+    user.value = null
   }
 }
 
-const handleAuthChange = (event: Event) => {
+const handleAuthChange = async (event: Event) => {
   const customEvent = event as CustomEvent<boolean>
-  isAuthenticated.value = customEvent.detail
+
+  if (customEvent.detail) {
+    await checkAuth()
+  } else {
+    isAuthenticated.value = false
+    user.value = null
+  }
 }
 
 const handleLogout = async () => {
@@ -61,6 +73,7 @@ const handleLogout = async () => {
   window.dispatchEvent(new CustomEvent('auth-changed', {
     detail: false
   }))
+  user.value = null
   router.push('/')
 }
 </script>

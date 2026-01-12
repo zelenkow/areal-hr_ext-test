@@ -39,6 +39,16 @@ const router = createRouter({
       name: 'employee-detail',
       component: () => import('@/views/EmployeeDetailView.vue'),
     },
+    {
+      path: '/audit_logs',
+      name: 'audit-logs',
+      component: () => import('@/views/AuditLogs.vue'),
+    },
+    {
+      path: '/audit-logs/:id',
+      name: 'audit-log-detail',
+      component: () => import('@/views/AuditLogDetail.vue'),
+    }
   ],
 })
 

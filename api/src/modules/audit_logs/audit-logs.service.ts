@@ -11,7 +11,6 @@ export class AuditLogsService {
     const query = `
       SELECT * 
       FROM audit_log 
-      WHERE deleted_at IS NULL
       ORDER BY created_at DESC
     `;
     const result = await this.databaseService.query<AuditLog>(query);
@@ -22,7 +21,7 @@ export class AuditLogsService {
     const query = `
       SELECT * 
       FROM audit_log 
-      WHERE id = $1 AND deleted_at IS NULL
+      WHERE id = $1
     `;
     const result = await this.databaseService.query<AuditLog>(query, [id]);
     return result.rows[0];

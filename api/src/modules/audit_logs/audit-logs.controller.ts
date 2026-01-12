@@ -12,9 +12,12 @@ import { AuditLogsService } from './audit-logs.service';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { CreateAuditLogSchema } from './schemas/create-audit-log.schema';
 import { SessionGuard } from '../auth/guards/session.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/guards/roles.guard';
 
 @Controller('audit-logs')
-@UseGuards(SessionGuard)
+@UseGuards(SessionGuard, RolesGuard)
+@Roles('admin')
 export class AuditLogsController {
   constructor(private readonly auditLogsService: AuditLogsService) {}
 
