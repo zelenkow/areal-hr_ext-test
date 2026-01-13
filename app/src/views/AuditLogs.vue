@@ -31,7 +31,7 @@
       </template>
     </DataTable>
 
-    <div v-else class="no-data">Нет записей в логах</div>
+    <div v-else class="no-data">Нет логов для отображения</div>
   </div>
 </template>
 
@@ -101,4 +101,12 @@ const getActionInfo = (log: AuditLog) => {
 .clickable-row:hover {
   background-color: #f8f9fa;
 }
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
 </style>
